@@ -90,7 +90,7 @@
         </div>
         <div class="title-box">
             <h2>生產用料明細計算表</h2>
-            <div class="subtitle" id="brandTitle">品牌 (BRAND): KEEN</div>
+            <div class="subtitle" id="brandTitle">KEEN</div>
         </div>
         <div style="width: 100px;"></div>
     </div>
@@ -131,7 +131,7 @@
         } else {
             customInput.style.display = "none";
         }
-        document.getElementById('brandTitle').innerText = `品牌 (BRAND): ${brandName}`;
+        document.getElementById('brandTitle').innerText = `${brandName}`;
     }
 
     function loadLogo(e) {
@@ -321,7 +321,7 @@
 
         tbody.innerHTML += `
             <tr style="background-color: #fafafa; font-weight: bold;">
-                <td colspan="7">合計 (TOTAL)</td>
+                <td colspan="7">合計</td>
                 <td class="right">${totalPairsAll.toLocaleString()}</td>
                 <td>-</td>
                 <td>-</td>
