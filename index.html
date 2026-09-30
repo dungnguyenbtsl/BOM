@@ -64,12 +64,12 @@
     </div>
 
     <div class="control-item">
-        <label><b>定額庫:</b></label>
+        <label><b>定額庫:</b> <span id="masterStatus" style="color:red; font-size:11px;">(未選)</span></label>
         <input type="file" id="masterFile" accept=".xlsx, .xls" onchange="loadMasterDB(event)" style="width: 130px;">
     </div>
 
     <div class="control-item">
-        <label><b>訂單文件:</b></label>
+        <label><b>訂單文件:</b> <span id="orderStatus" style="color:red; font-size:11px;">(未選)</span></label>
         <input type="file" id="orderFile" accept=".xlsx, .xls" onchange="loadOrderFile(event)" style="width: 130px;">
     </div>
 
@@ -138,41 +138,50 @@
         if (!file) return;
         const reader = new FileReader();
         reader.onload = function(e) {
-            const data = new Uint8Array(e.target.result);
-            const workbook = XLSX.read(data, {type: 'array'});
-            const sheet = workbook.Sheets[workbook.SheetNames[0]];
-            const rows = XLSX.utils.sheet_to_json(sheet, {header: 1});
-            
-            masterDB = {};
-            for (let i = 1; i < rows.length; i++) {
-                let r = rows[i];
-                if (!r || r.length < 14) continue;
+            try {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, {type: 'array'});
+                const sheetName = workbook.SheetNames[0];
+                const sheet = workbook.Sheets[sheetName];
+                const rows = XLSX.utils.sheet_to_json(sheet, {header: 1});
                 
-                let model = r[0] ? String(r[0]).trim() : '';
-                let component = r[5] ? String(r[5]).trim() : '部件';
-                let matCode = r[6] ? String(r[6]).trim() : '';
-                let matName = r[7] ? String(r[7]).trim() : '';
-                let unit = r[9] ? String(r[9]).trim() : (r[8] ? String(r[8]).trim() : 'Yard');
-                let color = r[10] ? String(r[10]).trim() : '';
-                let vendor = r[12] ? String(r[12]).trim() : '';
-                let rate = parseFloat(r[13]) || 0;
+                masterDB = {};
+                let count = 0;
+                for (let i = 1; i < rows.length; i++) {
+                    let r = rows[i];
+                    if (!r || r.length < 14) continue;
+                    
+                    let model = r[0] ? String(r[0]).trim() : '';
+                    let component = r[5] ? String(r[5]).trim() : '部件';
+                    let matCode = r[6] ? String(r[6]).trim() : '';
+                    let matName = r[7] ? String(r[7]).trim() : '';
+                    let unit = r[9] ? String(r[9]).trim() : (r[8] ? String(r[8]).trim() : 'Yard');
+                    let color = r[10] ? String(r[10]).trim() : '';
+                    let vendor = r[12] ? String(r[12]).trim() : '';
+                    let rate = parseFloat(r[13]) || 0;
 
-                if (model) {
-                    if (!masterDB[model]) {
-                        masterDB[model] = [];
+                    if (model) {
+                        if (!masterDB[model]) {
+                            masterDB[model] = [];
+                        }
+                        masterDB[model].push({
+                            component: component,
+                            materialCode: matCode,
+                            materialName: matName,
+                            materialUnit: unit,
+                            materialColor: color,
+                            vendor: vendor,
+                            rate: rate
+                        });
+                        count++;
                     }
-                    masterDB[model].push({
-                        component: component,
-                        materialCode: matCode,
-                        materialName: matName,
-                        materialUnit: unit,
-                        materialColor: color,
-                        vendor: vendor,
-                        rate: rate
-                    });
                 }
+                document.getElementById('masterStatus').innerText = `(已加载 ${count} 条定额)`;
+                document.getElementById('masterStatus').style.color = 'green';
+                alert("定額標準庫加載成功！共解析 " + count + " dòng định mức.");
+            } catch (err) {
+                alert("读取定额库出错: " + err.message);
             }
-            alert("定額標準庫加載成功！");
         };
         reader.readAsArrayBuffer(file);
     }
@@ -182,36 +191,48 @@
         if (!file) return;
         const reader = new FileReader();
         reader.onload = function(e) {
-            const data = new Uint8Array(e.target.result);
-            const workbook = XLSX.read(data, {type: 'array'});
-            const sheet = workbook.Sheets[workbook.SheetNames[0]];
-            const rows = XLSX.utils.sheet_to_json(sheet, {header: 1});
-            
-            orderRowsData = [];
-            // Giả định file đơn hàng Excel có cấu trúc: Cột 0: 型體 (SKU), Cột 1: 訂單號 (Order), Cột 2: 數量 (Pairs)
-            for (let i = 1; i < rows.length; i++) {
-                let r = rows[i];
-                if (!r || r.length < 3) continue;
-                let model = r[0] ? String(r[0]).trim() : '';
-                let order = r[1] ? String(r[1]).trim() : '';
-                let pairs = parseFloat(r[2]) || 0;
+            try {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, {type: 'array'});
+                const sheetName = workbook.SheetNames[0];
+                const sheet = workbook.Sheets[sheetName];
+                const rows = XLSX.utils.sheet_to_json(sheet, {header: 1});
                 
-                if (model && order && pairs > 0) {
-                    orderRowsData.push({model, order, pairs});
+                orderRowsData = [];
+                // Quét linh hoạt các dòng, tìm 型體, 訂單號, 數量
+                for (let i = 1; i < rows.length; i++) {
+                    let r = rows[i];
+                    if (!r || r.length < 3) continue;
+                    
+                    // Lọc bỏ các dòng trống toàn bộ
+                    let hasVal = r.some(cell => cell !== undefined && cell !== null && String(cell).trim() !== "");
+                    if (!hasVal) continue;
+
+                    let model = r[0] ? String(r[0]).trim() : '';
+                    let order = r[1] ? String(r[1]).trim() : '';
+                    let pairs = parseFloat(r[2]) || 0;
+                    
+                    if (model && order) {
+                        orderRowsData.push({model, order, pairs});
+                    }
                 }
+                document.getElementById('orderStatus').innerText = `(已加载 ${orderRowsData.length} 单)`;
+                document.getElementById('orderStatus').style.color = 'green';
+                alert("訂單文件加載成功！共解析 " + orderRowsData.length + " dòng đơn hàng.");
+            } catch (err) {
+                alert("读取订单文件出错: " + err.message);
             }
-            alert("訂單文件加載成功！");
         };
         reader.readAsArrayBuffer(file);
     }
 
     function processOrderList() {
         if (Object.keys(masterDB).length === 0) {
-            alert("請先上傳定額庫！");
+            alert("請先上傳定額庫！ (Master DB chưa được tải)");
             return;
         }
         if (orderRowsData.length === 0) {
-            alert("請先上傳訂單文件！");
+            alert("請先上傳訂單文件！ (File đơn hàng chưa có dữ liệu)");
             return;
         }
 
@@ -259,6 +280,11 @@
         }
 
         let stt = 1;
+
+        if (tableRows.length === 0 && missingOrders.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="11" style="color: red; padding: 20px;">未找到匹配的数据，请检查订单文件的列格式是否为 [型體 | 訂單號 | 數量]！</td></tr>`;
+            return;
+        }
 
         for (let row of tableRows) {
             tbody.innerHTML += `
