@@ -65,15 +65,16 @@
 
     <div class="control-item">
         <label><b>定額庫:</b></label>
-        <input type="file" id="masterFile" accept=".xlsx, .xls" onchange="loadMasterDB(event)" style="width: 150px;">
+        <input type="file" id="masterFile" accept=".xlsx, .xls" onchange="loadMasterDB(event)" style="width: 130px;">
     </div>
 
     <div class="control-item">
         <label><b>訂單文件:</b></label>
-        <input type="file" id="orderFile" accept=".xlsx, .xls" onchange="loadOrderFile(event)" style="width: 150px;">
+        <input type="file" id="orderFile" accept=".xlsx, .xls" onchange="loadOrderFile(event)" style="width: 130px;">
     </div>
 
     <div class="control-item">
+        <button class="btn" onclick="processOrderList()">生成 (生成數據)</button>
         <button class="btn btn-excel" onclick="exportToExcel()">導出 Excel</button>
         <button class="btn btn-word" onclick="exportToWord()">導出 Word</button>
         <button class="btn btn-success" onclick="window.print()">打印</button>
@@ -109,7 +110,7 @@
             </tr>
         </thead>
         <tbody id="tableBody">
-            <tr><td colspan="11" style="color: #777; padding: 20px;">請上傳定額庫與訂單文件...</td></tr>
+            <tr><td colspan="11" style="color: #777; padding: 20px;">請上傳定額庫與訂單文件後點擊「生成」...</td></tr>
         </tbody>
     </table>
 </div>
@@ -172,7 +173,6 @@
                 }
             }
             alert("定額標準庫加載成功！");
-            checkAndProcess();
         };
         reader.readAsArrayBuffer(file);
     }
@@ -201,19 +201,19 @@
                 }
             }
             alert("訂單文件加載成功！");
-            checkAndProcess();
         };
         reader.readAsArrayBuffer(file);
     }
 
-    function checkAndProcess() {
-        if (Object.keys(masterDB).length > 0 && orderRowsData.length > 0) {
-            processOrderList();
-        }
-    }
-
     function processOrderList() {
-        if (orderRowsData.length === 0) return;
+        if (Object.keys(masterDB).length === 0) {
+            alert("請先上傳定額庫！");
+            return;
+        }
+        if (orderRowsData.length === 0) {
+            alert("請先上傳訂單文件！");
+            return;
+        }
 
         let tbody = document.getElementById('tableBody');
         tbody.innerHTML = '';
