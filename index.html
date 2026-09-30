@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+l<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -97,15 +97,15 @@
         <thead>
             <tr>
                 <th style="width: 4%;">項次</th>
-                <th style="width: 15%;">工廠型體</th>
-                <th style="width: 11%;">料號</th>
-                <th style="width: 19%;">材料名稱與規格</th>
-                <th style="width: 9%;">顏色</th>
+                <th style="width: 14%;">工廠型體</th>
+                <th style="width: 10%;">料號</th>
+                <th style="width: 18%;">材料名稱與規格</th>
+                <th style="width: 8%;">顏色</th>
                 <th style="width: 10%;">供應商</th>
-                <th style="width: 11%;">生產訂單號</th>
-                <th style="width: 7%;">數量</th>
+                <th style="width: 10%;">生產訂單號</th>
+                <th style="width: 6%;">數量</th>
                 <th style="width: 6%;">單位</th>
-                <th style="width: 17%;">部件與用量</th>
+                <th style="width: 14%;">部件</th>
                 <th style="width: 10%;">總用量</th>
             </tr>
         </thead>
@@ -187,8 +187,7 @@
         let tbody = document.getElementById('tableBody');
         tbody.innerHTML = '';
 
-        let ordersMap = {}; 
-        let orderListKeys = [];
+        let tableRows = [];
         let missingOrders = [];
         let totalPairsAll = 0;
         let totalByUnit = {};
@@ -205,85 +204,53 @@
             if (!model || !order || pairs <= 0) continue;
 
             let bomList = masterDB[model];
+            totalPairsAll += pairs;
 
             if (!bomList) {
                 missingOrders.push({model, order, pairs});
-                totalPairsAll += pairs;
                 continue;
             }
 
-            if (!ordersMap[order]) {
-                ordersMap[order] = {
-                    model: model,
-                    pairs: pairs,
-                    materials: {}
-                };
-                orderListKeys.push(order);
-            } else {
-                ordersMap[order].pairs += pairs;
-            }
-
-            totalPairsAll += pairs;
-
             for (let bom of bomList) {
-                let matKey = (bom.materialCode || "UNKNOWN") + "_" + (bom.materialColor || "DEFAULT");
-                let matGroup = ordersMap[order].materials;
+                let totalVal = pairs * bom.rate;
+                let unit = bom.materialUnit || 'Yard';
 
-                if (!matGroup[matKey]) {
-                    matGroup[matKey] = {
-                        materialCode: bom.materialCode,
-                        materialName: bom.materialName,
-                        materialColor: bom.materialColor,
-                        vendor: bom.vendor,
-                        materialUnit: bom.materialUnit || 'Yard',
-                        componentTotals: {},
-                        grandTotal: 0
-                    };
-                }
+                if (!totalByUnit[unit]) totalByUnit[unit] = 0;
+                totalByUnit[unit] += totalVal;
 
-                let val = pairs * bom.rate;
-                if (!matGroup[matKey].componentTotals[bom.component]) {
-                    matGroup[matKey].componentTotals[bom.component] = 0;
-                }
-                matGroup[matKey].componentTotals[bom.component] += val;
-                matGroup[matKey].grandTotal += val;
+                tableRows.push({
+                    model: model,
+                    order: order,
+                    pairs: pairs,
+                    component: bom.component,
+                    materialCode: bom.materialCode,
+                    materialName: bom.materialName,
+                    materialColor: bom.materialColor,
+                    vendor: bom.vendor,
+                    materialUnit: unit,
+                    totalVal: totalVal
+                });
             }
         }
 
         let stt = 1;
 
-        for (let orderName of orderListKeys) {
-            let ordData = ordersMap[orderName];
-            let matKeys = Object.keys(ordData.materials);
-            
-            for (let mKey of matKeys) {
-                let item = ordData.materials[mKey];
-                let unit = item.materialUnit;
-
-                if (!totalByUnit[unit]) totalByUnit[unit] = 0;
-                totalByUnit[unit] += item.grandTotal;
-
-                let compHtml = "";
-                for (let [compName, val] of Object.entries(item.componentTotals)) {
-                    compHtml += `[${compName}: ${val.toFixed(2)}] `;
-                }
-
-                tbody.innerHTML += `
-                    <tr>
-                        <td>${stt++}</td>
-                        <td class="left"><b>${ordData.model}</b></td>
-                        <td class="left"><b>${item.materialCode}</b></td>
-                        <td class="left">${item.materialName}</td>
-                        <td class="left"><b>${item.materialColor}</b></td>
-                        <td>${item.vendor}</td>
-                        <td class="left"><b>${orderName}</b></td>
-                        <td class="right">${ordData.pairs.toLocaleString()}</td>
-                        <td><b>${unit}</b></td>
-                        <td class="left" style="font-size:10px;">${compHtml}</td>
-                        <td class="right"><b>${item.grandTotal.toFixed(2)}</b></td>
-                    </tr>
-                `;
-            }
+        for (let row of tableRows) {
+            tbody.innerHTML += `
+                <tr>
+                    <td>${stt++}</td>
+                    <td class="left"><b>${row.model}</b></td>
+                    <td class="left"><b>${row.materialCode}</b></td>
+                    <td class="left">${row.materialName}</td>
+                    <td class="left"><b>${row.materialColor}</b></td>
+                    <td>${row.vendor}</td>
+                    <td class="left"><b>${row.order}</b></td>
+                    <td class="right">${row.pairs.toLocaleString()}</td>
+                    <td><b>${row.materialUnit}</b></td>
+                    <td class="left"><b>${row.component}</b></td>
+                    <td class="right"><b>${row.totalVal.toFixed(2)}</b></td>
+                </tr>
+            `;
         }
 
         for (let miss of missingOrders) {
