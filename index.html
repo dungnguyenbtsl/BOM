@@ -61,11 +61,6 @@
         </select>
         <input type="text" id="customBrandInput" placeholder="輸入品牌" style="display:none; width:90px;" oninput="updateBrandTitle()">
     </div>
-    
-    <div class="control-item">
-        <label><b>Logo:</b></label>
-        <input type="file" id="logoFile" accept="image/*" onchange="loadLogo(event)" style="width: 140px;">
-    </div>
 
     <div class="control-item">
         <label><b>定額庫:</b></label>
@@ -132,17 +127,6 @@
             customInput.style.display = "none";
         }
         document.getElementById('brandTitle').innerText = `${brandName}`;
-    }
-
-    function loadLogo(e) {
-        const file = e.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            let container = document.getElementById('logoContainer');
-            container.innerHTML = `<img src="${e.target.result}" alt="Logo">`;
-        };
-        reader.readAsDataURL(file);
     }
 
     function loadMasterDB(e) {
