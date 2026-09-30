@@ -19,6 +19,8 @@
         .btn:hover { background-color: #004d99; }
         .btn-success { background-color: #28a745; }
         .btn-success:hover { background-color: #218838; }
+        .btn-excel { background-color: #17a2b8; }
+        .btn-excel:hover { background-color: #138496; }
         .btn-word { background-color: #d9534f; }
         .btn-word:hover { background-color: #c9302c; }
 
@@ -73,8 +75,9 @@
 
     <div class="control-item">
         <button class="btn" onclick="processOrderList()">生成</button>
-        <button class="btn btn-success" onclick="window.print()">打印</button>
+        <button class="btn btn-excel" onclick="exportToExcel()">導出 Excel</button>
         <button class="btn btn-word" onclick="exportToWord()">導出 Word</button>
+        <button class="btn btn-success" onclick="window.print()">打印</button>
     </div>
 </div>
 
@@ -90,7 +93,7 @@
         <div style="width: 100px;"></div>
     </div>
 
-    <table>
+    <table id="resultTable">
         <thead>
             <tr>
                 <th style="width: 4%;">項次</th>
@@ -312,6 +315,12 @@
                 <td class="right">${totalSummaryText}</td>
             </tr>
         `;
+    }
+
+    function exportToExcel() {
+        let table = document.getElementById("resultTable");
+        let wb = XLSX.utils.table_to_book(table, {sheet: "用料明細計算表"});
+        XLSX.writeFile(wb, "生產用料明細計算表.xlsx");
     }
 
     function exportToWord() {
