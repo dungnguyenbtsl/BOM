@@ -204,7 +204,8 @@ BOM/
 ├── SECURITY.md            # Chính sách bảo mật
 └── .github/
     ├── ISSUE_TEMPLATE/    # Mẫu issue báo lỗi và đề xuất
-    └── workflows/         # Cấu hình triển khai GitHub Pages
+    ├── scripts/           # Script kiểm tra CI
+    └── workflows/         # CI và triển khai GitHub Pages
 ```
 
 ## Đóng góp
@@ -245,6 +246,7 @@ Các tài liệu dành cho cộng đồng và người duy trì dự án:
 
 ## Trạng thái dự án
 
+[![CI](https://github.com/dungnguyenbtsl/BOM/actions/workflows/ci.yml/badge.svg)](https://github.com/dungnguyenbtsl/BOM/actions/workflows/ci.yml)
 ![Status](https://img.shields.io/badge/status-active-success)
 ![Deployment](https://img.shields.io/badge/deployment-GitHub%20Pages-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
@@ -437,6 +439,18 @@ Một pull request nên bao gồm:
 - Cách kiểm thử.
 - Ảnh hưởng đến định dạng Excel hoặc bản in.
 - Xác nhận không đưa dữ liệu sản xuất thật vào commit.
+
+## Continuous Integration (CI)
+
+Workflow [CI](.github/workflows/ci.yml) tự động chạy khi có push lên `main`, Pull Request vào `main` hoặc khi được kích hoạt thủ công. CI hiện kiểm tra:
+
+- Các file tài liệu và cấu hình bắt buộc có tồn tại và không rỗng.
+- Cấu trúc HTML cơ bản của `index.html`.
+- Cú pháp JavaScript inline bằng Node.js.
+- Không có file credential hoặc file Excel dữ liệu sản xuất trong repository.
+- Các liên kết nội bộ trong README trỏ đến file tồn tại.
+
+Script kiểm tra nằm tại [.github/scripts/validate_repo.py](.github/scripts/validate_repo.py). Workflow CI chỉ kiểm tra mã nguồn; workflow deploy Pages vẫn chịu trách nhiệm triển khai ứng dụng.
 
 ## Triển khai GitHub Pages
 

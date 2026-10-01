@@ -147,7 +147,7 @@ rate: rate
 count++;
 }
 }
-document.getElementById('masterStatus').innerText = ⁠(已加载 ${count} 条)⁠;
+document.getElementById('masterStatus').innerText = `(已加载 ${count} 条)`;
 document.getElementById('masterStatus').style.color = 'green';
 } catch (err) {
 alert("读取定额库出错: " + err.message);
@@ -172,13 +172,13 @@ if (!r || r.length < 3) continue;
 let hasVal = r.some(cell => cell !== undefined && cell !== null && String(cell).trim() !== "");
 if (!hasVal) continue;
 let model = r[0] ? String(r[0]).trim() : '';
-let order = r[1] ? String(r[1]").trim() : '';
+let order = r[1] ? String(r[1]).trim() : '';
 let pairs = parseFloat(r[2]) || 0;
 if (model && order) {
 orderRowsData.push({model, order, pairs});
 }
 }
-document.getElementById('orderStatus').innerText = ⁠(已加载 ${orderRowsData.length} 单)⁠;
+document.getElementById('orderStatus').innerText = `(已加载 ${orderRowsData.length} 单)`;
 document.getElementById('orderStatus').style.color = 'green';
 } catch (err) {
 alert("读取订单文件出错: " + err.message);
@@ -211,7 +211,7 @@ let container = document.getElementById('pagesContainer');
 container.innerHTML = '';
 let skuKeys = Object.keys(skuMap);
 if (skuKeys.length === 0) {
-container.innerHTML = ⁠<div class="page"><div class="missing-data">未找到有效数据！</div></div>⁠;
+container.innerHTML = `<div class="page"><div class="missing-data">未找到有效数据！</div></div>`;
 return;
 }
 for (let model of skuKeys) {
@@ -219,9 +219,9 @@ let ordersOfSku = skuMap[model];
 let bomList = masterDB[model];
 let pageDiv = document.createElement('div');
 pageDiv.className = 'page';
-let headerHTML = ⁠<div class="header-container"> <div class="logo-box"> <img src="https://dungnguyenbtsl.github.io/FULIAO-LABEL/logo.jpeg" alt="Logo"> </div> <div class="title-box"> <h2>生產用料明細計算表</h2> <div class="subtitle subtitle-brand">${brandName}</div> </div> <div class="sku-title">型體: ${model}</div> </div>⁠;
+let headerHTML = `<div class="header-container"> <div class="logo-box"> <img src="https://dungnguyenbtsl.github.io/FULIAO-LABEL/logo.jpeg" alt="Logo"> </div> <div class="title-box"> <h2>生產用料明細計算表</h2> <div class="subtitle subtitle-brand">${brandName}</div> </div> <div class="sku-title">型體: ${model}</div> </div>`;
 if (!bomList) {
-pageDiv.innerHTML = headerHTML + ⁠<div class="missing-data">型體 ${model} 找不到對應的定額數據 (BOM Missing)</div>⁠;
+pageDiv.innerHTML = headerHTML + `<div class="missing-data">型體 ${model} 找不到對應的定額數據 (BOM Missing)</div>`;
 container.appendChild(pageDiv);
 continue;
 }
@@ -245,13 +245,13 @@ let bodyContent = headerHTML;
 // Duyệt qua từng vật liệu riêng biệt để tạo một bảng riêng biệt
 for (let mKey in materialGroups) {
 let mat = materialGroups[mKey];
-bodyContent += ⁠<div class="material-section"> <div class="material-header"> <div>料號 (Code): <b>${mat.materialCode}</b> | 名稱 (Name): <b>${mat.materialName}</b></div> <div>顏色 (Color): <b>${mat.materialColor}</b> | 供應商 (Vendor): <b>${mat.vendor}</b> | 單位 (Unit): <b>${mat.materialUnit}</b></div> </div> <table> <thead> <tr> <th style="width: 5%;">項次</th> <th style="width: 15%;">生產訂單號</th> <th style="width: 10%;">數量 (雙)</th>⁠;
+bodyContent += `<div class="material-section"> <div class="material-header"> <div>料號 (Code): <b>${mat.materialCode}</b> | 名稱 (Name): <b>${mat.materialName}</b></div> <div>顏色 (Color): <b>${mat.materialColor}</b> | 供應商 (Vendor): <b>${mat.vendor}</b> | 單位 (Unit): <b>${mat.materialUnit}</b></div> </div> <table> <thead> <tr> <th style="width: 5%;">項次</th> <th style="width: 15%;">生產訂單號</th> <th style="width: 10%;">數量 (雙)</th>`;
 // Tạo tiêu đề cột cho từng 部件 (Component) của vật liệu này
 let compNames = Object.keys(mat.components);
 for (let cName of compNames) {
-bodyContent += ⁠<th>部件: ${cName} (用量)</th>⁠;
+bodyContent += `<th>部件: ${cName} (用量)</th>`;
 }
-bodyContent += ⁠<th style="width: 12%;">總用量</th> </tr> </thead> <tbody>⁠;
+bodyContent += `<th style="width: 12%;">總用量</th> </tr> </thead> <tbody>`;
 let stt = 1;
 let totalMatForSku = 0;
 let totalPairsForSku = 0;
@@ -261,23 +261,23 @@ for (let ord of ordersOfSku) {
 let orderPairs = ord.pairs;
 totalPairsForSku += orderPairs;
 let rowSum = 0;
-bodyContent += ⁠<tr> <td>${stt++}</td> <td class="left"><b>${ord.order}</b></td> <td class="right">${orderPairs.toLocaleString()}</td>⁠;
+bodyContent += `<tr> <td>${stt++}</td> <td class="left"><b>${ord.order}</b></td> <td class="right">${orderPairs.toLocaleString()}</td>`;
 for (let cName of compNames) {
 let rate = mat.components[cName];
 let subVal = orderPairs * rate;
 rowSum += subVal;
 compTotals[cName] += subVal;
-bodyContent += ⁠<td class="right">${subVal.toFixed(2)}</td>⁠;
+bodyContent += `<td class="right">${subVal.toFixed(2)}</td>`;
 }
 totalMatForSku += rowSum;
-bodyContent += ⁠<td class="right"><b>${rowSum.toFixed(2)}</b></td> </tr>⁠;
+bodyContent += `<td class="right"><b>${rowSum.toFixed(2)}</b></td> </tr>`;
 }
 // Dòng tổng kết cho vật liệu này
-bodyContent += ⁠<tr style="background-color: #fafafa; font-weight: bold;"> <td colspan="2">小計 (Total)</td> <td class="right">${totalPairsForSku.toLocaleString()}</td>⁠;
+bodyContent += `<tr style="background-color: #fafafa; font-weight: bold;"> <td colspan="2">小計 (Total)</td> <td class="right">${totalPairsForSku.toLocaleString()}</td>`;
 for (let cName of compNames) {
-bodyContent += ⁠<td class="right">${compTotals[cName].toFixed(2)}</td>⁠;
+bodyContent += `<td class="right">${compTotals[cName].toFixed(2)}</td>`;
 }
-bodyContent += ⁠<td class="right" style="color: #c0392b;">${totalMatForSku.toFixed(2)} ${mat.materialUnit}</td> </tr> </tbody> </table> </div>⁠;
+bodyContent += `<td class="right" style="color: #c0392b;">${totalMatForSku.toFixed(2)} ${mat.materialUnit}</td> </tr> </tbody> </table> </div>`;
 }
 pageDiv.innerHTML = bodyContent;
 container.appendChild(pageDiv);
@@ -292,7 +292,7 @@ return;
 }
 let wb = XLSX.utils.book_new();
 pages.forEach((page, idx) => {
-let skuTitle = page.querySelector('.sku-title') ? page.querySelector('.sku-title').innerText : ⁠Sheet_${idx+1}⁠;
+let skuTitle = page.querySelector('.sku-title') ? page.querySelector('.sku-title').innerText : `Sheet_${idx+1}`;
 let tables = page.querySelectorAll('table');
 // Gộp dữ liệu trang thành 1 sheet hoặc xuất gộp
 let ws = XLSX.utils.table_to_sheet(page);
@@ -302,7 +302,7 @@ XLSX.writeFile(wb, "生產用料明細計算表_按SKU.xlsx");
 }
 function exportToWord() {
 let containerHTML = document.getElementById('pagesContainer').innerHTML;
-let wrappedHTML = ⁠<!DOCTYPE html> <html> <head> <meta charset="utf-8"> <style> body { font-family: 'Microsoft YaHei', Arial, sans-serif; } .page { page-break-after: always; margin-bottom: 20px; } .header-container { display: flex; justify-content: space-between; border-bottom: 2px solid #333; padding-bottom: 5px; margin-bottom: 10px; } .material-section { margin-top: 10px; margin-bottom: 10px; border: 1px solid #0066cc; } .material-header { background-color: #e6f2ff; padding: 5px; font-weight: bold; font-size: 10px; } table { width: 100%; border-collapse: collapse; font-size: 9px; margin-top: 5px; } th, td { border: 1px solid #333; padding: 3px; text-align: center; } th { background-color: #eaecef; } .left { text-align: left; } .right { text-align: right; } h2 { font-size: 14px; margin: 0; text-align: center; } .subtitle { font-size: 10px; color: #c0392b; text-align: center; font-weight: bold; } .sku-title { font-size: 11px; font-weight: bold; color: #0066cc; text-align: right; } </style> </head> <body> ${containerHTML} </body> </html>⁠;
+let wrappedHTML = `<!DOCTYPE html> <html> <head> <meta charset="utf-8"> <style> body { font-family: 'Microsoft YaHei', Arial, sans-serif; } .page { page-break-after: always; margin-bottom: 20px; } .header-container { display: flex; justify-content: space-between; border-bottom: 2px solid #333; padding-bottom: 5px; margin-bottom: 10px; } .material-section { margin-top: 10px; margin-bottom: 10px; border: 1px solid #0066cc; } .material-header { background-color: #e6f2ff; padding: 5px; font-weight: bold; font-size: 10px; } table { width: 100%; border-collapse: collapse; font-size: 9px; margin-top: 5px; } th, td { border: 1px solid #333; padding: 3px; text-align: center; } th { background-color: #eaecef; } .left { text-align: left; } .right { text-align: right; } h2 { font-size: 14px; margin: 0; text-align: center; } .subtitle { font-size: 10px; color: #c0392b; text-align: center; font-weight: bold; } .sku-title { font-size: 11px; font-weight: bold; color: #0066cc; text-align: right; } </style> </head> <body> ${containerHTML} </body> </html>`;
 let converted = htmlDocx.asBlob(wrappedHTML, {
 orientation: 'landscape',
 margins: { top: 720, bottom: 720, left: 720, right: 720 }
