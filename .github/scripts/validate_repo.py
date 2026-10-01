@@ -22,6 +22,9 @@ REQUIRED_FILES = [
     ".github/ISSUE_TEMPLATE/config.yml",
     ".github/ISSUE_TEMPLATE/bug_report.md",
     ".github/ISSUE_TEMPLATE/feature_request.md",
+    "robots.txt",
+    "sitemap.xml",
+    "assets/logo.jpeg",
 ]
 
 
@@ -53,6 +56,31 @@ def check_html() -> None:
         fail("index.html has unbalanced style tags")
 
     print("OK: HTML structure smoke checks passed")
+
+
+def check_seo_metadata() -> None:
+    html = (ROOT / "index.html").read_text(encoding="utf-8")
+    required_snippets = [
+        '<meta name="description"',
+        '<meta name="robots"',
+        '<link rel="canonical" href="https://dungnguyenbtsl.github.io/BOM/">',
+        '<meta property="og:title"',
+        '<meta property="og:url" content="https://dungnguyenbtsl.github.io/BOM/">',
+        '<meta name="twitter:card"',
+    ]
+    missing = [snippet for snippet in required_snippets if snippet not in html]
+    if missing:
+        fail("required SEO metadata is missing: " + ", ".join(missing))
+
+    robots = (ROOT / "robots.txt").read_text(encoding="utf-8")
+    sitemap_url = "Sitemap: https://dungnguyenbtsl.github.io/BOM/sitemap.xml"
+    if sitemap_url not in robots:
+        fail("robots.txt does not reference the public sitemap")
+
+    sitemap = (ROOT / "sitemap.xml").read_text(encoding="utf-8")
+    if "https://dungnguyenbtsl.github.io/BOM/" not in sitemap:
+        fail("sitemap.xml does not contain the canonical site URL")
+    print("OK: SEO metadata, robots.txt, and sitemap.xml checks passed")
 
 
 def check_inline_javascript() -> None:
@@ -124,6 +152,7 @@ def check_readme_links() -> None:
 def main() -> None:
     check_required_files()
     check_html()
+    check_seo_metadata()
     check_inline_javascript()
     check_sensitive_files()
     check_readme_links()

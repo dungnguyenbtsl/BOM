@@ -1,10 +1,31 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
-<title>生產用料明細計算表 (多頁面按SKU與物料分類)</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/html-docx-js@0.3.1/dist/html-docx.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="BOM 生產用料計算工具：從 BOM 與訂單 Excel 計算 SKU 物料需求，並產生可列印及可匯出的報表。">
+<meta name="author" content="dungnguyenbtsl">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta name="theme-color" content="#0066cc">
+<link rel="canonical" href="https://dungnguyenbtsl.github.io/BOM/">
+<link rel="preload" as="image" href="assets/logo.jpeg" type="image/jpeg">
+<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="BOM Production Material Requirement Calculator">
+<meta property="og:title" content="BOM 生產用料明細計算表">
+<meta property="og:description" content="從 BOM 與訂單 Excel 計算 SKU 物料需求，產生可列印、Excel 及 Word 報表。">
+<meta property="og:url" content="https://dungnguyenbtsl.github.io/BOM/">
+<meta property="og:image" content="https://dungnguyenbtsl.github.io/BOM/assets/logo.jpeg">
+<meta property="og:image:alt" content="BOM production material calculator">
+<meta property="og:locale" content="zh_TW">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="BOM 生產用料明細計算表">
+<meta name="twitter:description" content="從 BOM 與訂單 Excel 計算 SKU 物料需求，產生可列印、Excel 及 Word 報表。">
+<meta name="twitter:image" content="https://dungnguyenbtsl.github.io/BOM/assets/logo.jpeg">
+<title>BOM 生產用料明細計算表｜SKU 物料需求報表</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/html-docx-js@0.3.1/dist/html-docx.js" defer></script>
 <style>
 @page { size: A4 landscape; margin: 8mm; }
 * { box-sizing: border-box; }
@@ -44,9 +65,24 @@ body { background: none; padding: 0; }
 .page { box-shadow: none; margin: 0; width: 100%; padding: 0; page-break-after: always; }
 .missing-data { -webkit-print-color-adjust: exact; }
 }
+.sr-only {
+position: absolute;
+width: 1px;
+height: 1px;
+padding: 0;
+margin: -1px;
+overflow: hidden;
+clip: rect(0, 0, 0, 0);
+white-space: nowrap;
+border: 0;
+}
 </style>
 </head>
 <body>
+<h1 class="sr-only">BOM 生產用料明細計算表</h1>
+<noscript>
+<p>此工具需要啟用 JavaScript，才能讀取 BOM 與訂單 Excel 檔案並產生物料需求報表。</p>
+</noscript>
 <div class="control-panel">
 <div class="control-item">
 <label><b>品牌 (Brand):</b></label>
@@ -79,7 +115,7 @@ body { background: none; padding: 0; }
 <div class="page">
 <div class="header-container">
 <div class="logo-box">
-<img src="https://dungnguyenbtsl.github.io/FULIAO-LABEL/logo.jpeg" alt="Logo">
+<img src="assets/logo.jpeg" width="100" height="40" alt="BOM company logo" decoding="async">
 </div>
 <div class="title-box">
 <h2>生產用料明細計算表</h2>
@@ -219,7 +255,7 @@ let ordersOfSku = skuMap[model];
 let bomList = masterDB[model];
 let pageDiv = document.createElement('div');
 pageDiv.className = 'page';
-let headerHTML = `<div class="header-container"> <div class="logo-box"> <img src="https://dungnguyenbtsl.github.io/FULIAO-LABEL/logo.jpeg" alt="Logo"> </div> <div class="title-box"> <h2>生產用料明細計算表</h2> <div class="subtitle subtitle-brand">${brandName}</div> </div> <div class="sku-title">型體: ${model}</div> </div>`;
+let headerHTML = `<div class="header-container"> <div class="logo-box"> <img src="assets/logo.jpeg" width="100" height="40" alt="BOM company logo" decoding="async"> </div> <div class="title-box"> <h2>生產用料明細計算表</h2> <div class="subtitle subtitle-brand">${brandName}</div> </div> <div class="sku-title">型體: ${model}</div> </div>`;
 if (!bomList) {
 pageDiv.innerHTML = headerHTML + `<div class="missing-data">型體 ${model} 找不到對應的定額數據 (BOM Missing)</div>`;
 container.appendChild(pageDiv);

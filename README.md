@@ -197,6 +197,9 @@ Mở trực tiếp file `index.html` cũng có thể hoạt động trong nhiề
 ```text
 BOM/
 ├── index.html              # Giao diện, CSS và logic xử lý chính
+├── assets/logo.jpeg       # Logo local dùng cho giao diện và social preview
+├── robots.txt              # Quy tắc crawler và liên kết sitemap
+├── sitemap.xml             # Sitemap cho trang public
 ├── README.md               # Tài liệu dự án
 ├── LICENSE                # MIT License
 ├── CONTRIBUTING.md        # Hướng dẫn đóng góp
@@ -439,6 +442,12 @@ Một pull request nên bao gồm:
 - Cách kiểm thử.
 - Ảnh hưởng đến định dạng Excel hoặc bản in.
 - Xác nhận không đưa dữ liệu sản xuất thật vào commit.
+
+## SEO và hiệu năng
+
+Trang public sử dụng canonical URL `https://dungnguyenbtsl.github.io/BOM/`, metadata Open Graph/Twitter Card, `robots.txt` và `sitemap.xml`. Logo được lưu local trong `assets/logo.jpeg` để tránh phụ thuộc cross-repository. Các thư viện Excel/Word được tải bằng `defer` để giảm chặn render ban đầu.
+
+Ứng dụng vẫn xử lý dữ liệu Excel ở phía trình duyệt; dữ liệu người dùng không được đưa vào sitemap hoặc metadata public.
 
 ## Continuous Integration (CI)
 
