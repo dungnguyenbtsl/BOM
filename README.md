@@ -1,1 +1,174 @@
-# BOM
+BOM — Production Material Requirement Calculator
+Công cụ web tĩnh dùng để tính toán và trình bày nhu cầu vật liệu sản xuất theo SKU/model và đơn hàng từ dữ liệu BOM định mức và danh sách đơn hàng Excel.
+
+Ứng dụng được thiết kế cho quy trình sản xuất, đặc biệt là báo cáo vật liệu theo từng model, từng nhóm vật liệu và từng lệnh sản xuất.
+
+ Demo: Mở BOM Production Material Requirement Calculator 
+
+Tính năng
+	•	Đọc file định mức BOM từ `.xlsx` hoặc `.xls`.
+	•	Đọc danh sách đơn hàng từ `.xlsx` hoặc `.xls`.
+	•	Hỗ trợ lựa chọn thương hiệu:
+	◦	KEEN
+	◦	SAUCONY
+	◦	KOLON
+	◦	BLACKYAK
+	◦	Thương hiệu tùy chỉnh
+	•	Gom nhóm báo cáo theo SKU/model.
+	•	Hiển thị mỗi SKU trên một trang riêng.
+	•	Gom nhóm vật liệu theo mã vật liệu và màu sắc.
+	•	Tính nhu cầu vật liệu dựa trên số lượng đôi và định mức tiêu hao.
+	•	Hiển thị thông tin vật liệu:
+	◦	Mã vật liệu
+	◦	Tên vật liệu
+	◦	Màu sắc
+	◦	Nhà cung cấp
+	◦	Đơn vị tính
+	◦	Bộ phận sử dụng
+	•	In báo cáo theo khổ A4 ngang.
+	•	Xuất báo cáo ra Excel.
+	•	Xuất báo cáo ra Word `.docx`.
+	•	Xử lý dữ liệu trực tiếp trên trình duyệt; file Excel không cần tải lên máy chủ.
+
+Cách sử dụng
+	1.	Mở ứng dụng BOM.
+	2.	Chọn thương hiệu hoặc nhập thương hiệu tùy chỉnh.
+	3.	Tải lên file định mức BOM.
+	4.	Tải lên file đơn hàng.
+	5.	Nhấn Generate / 生成報表 để tạo báo cáo.
+	6.	Kiểm tra kết quả theo từng SKU/model.
+	7.	Chọn một trong các thao tác:
+	◦	Export Excel để xuất file `.xlsx`.
+	◦	Export Word để xuất file `.docx`.
+	◦	Print để in báo cáo theo khổ A4 ngang.
+
+Ứng dụng sử dụng sheet đầu tiên trong mỗi workbook Excel.
+
+Định dạng file đầu vào
+1. File định mức BOM
+Ứng dụng đọc dữ liệu từ dòng thứ hai trở đi; dòng đầu tiên được xem là dòng tiêu đề. Các cột được đọc theo vị trí cột, bắt đầu từ cột A:
+
+
+ Vị trí Trường Mô tả A `model` SKU/model hoặc mã kiểu sản phẩm F `component` Bộ phận sử dụng G `materialCode` Mã vật liệu H `materialName` Tên vật liệu I hoặc J `unit` Đơn vị tính; ưu tiên cột J, nếu trống dùng cột I K `color` Màu sắc vật liệu M `vendor` Nhà cung cấp N `rate` Định mức tiêu hao cho một đôi 
+Các cột B–E và L hiện không được sử dụng trực tiếp trong quá trình tính toán nhưng vẫn có thể tồn tại trong file nguồn để giữ nguyên cấu trúc dữ liệu doanh nghiệp.
+
+Ví dụ cấu trúc tối thiểu:
+
+
+ | Model | ... | Component | Material Code | Material Name | Unit | Color | ... | Vendor | Rate |
+|-------|-----|-----------|---------------|---------------|------|-------|-----|--------|------|
+| K001  | ... | Upper     | MAT-001       | Mesh          | Yard | Black | ... | Vendor A | 0.85 |
+ 
+ Lưu ý: do chương trình đọc theo vị trí cột, không nên thay đổi thứ tự các cột đang được sử dụng. 
+
+2. File đơn hàng
+Ứng dụng đọc dữ liệu từ dòng thứ hai trở đi; dòng đầu tiên được xem là dòng tiêu đề.
+
+
+ Vị trí Trường Mô tả A `model` SKU/model, dùng để liên kết với file BOM B `order` Mã đơn hàng hoặc lệnh sản xuất C `pairs` Số lượng đôi cần sản xuất 
+Ví dụ:
+
+
+ | Model | Production Order | Pairs |
+|--------|------------------|-------|
+| K001   | PO-2026-0001     | 1200  |
+| K001   | PO-2026-0002     | 800   |
+| K002   | PO-2026-0003     | 500   |
+ 
+Công thức tính
+Với mỗi vật liệu và mỗi đơn hàng:
+
+
+ Nhu cầu vật liệu = Số lượng đôi × Định mức tiêu hao
+ 
+Tổng nhu cầu của một vật liệu trong một SKU/model được tính bằng tổng nhu cầu từ tất cả các đơn hàng tương ứng.
+
+Luồng xử lý
+
+ File BOM Excel + File đơn hàng Excel
+                │
+                ▼
+       Đọc dữ liệu trên trình duyệt
+                │
+                ▼
+       Ghép theo SKU/model
+                │
+                ▼
+  Gom nhóm theo mã vật liệu và màu sắc
+                │
+                ▼
+      Tính nhu cầu vật liệu
+                │
+                ▼
+   Báo cáo theo SKU / In / Excel / Word
+ 
+Công nghệ sử dụng
+	•	HTML5
+	•	CSS3
+	•	JavaScript thuần
+	•	SheetJS — đọc và xuất file Excel
+	•	html-docx-js — tạo file Word từ HTML
+	•	GitHub Pages — triển khai ứng dụng tĩnh
+	•	GitHub Actions — tự động deploy nội dung tĩnh
+
+Quyền riêng tư và bảo mật dữ liệu
+Ứng dụng xử lý file Excel bằng JavaScript ngay trên trình duyệt. Không có backend riêng trong repo này và file đầu vào không được gửi lên server của ứng dụng.
+
+Tuy vậy, người dùng vẫn nên:
+
+	•	Không đưa dữ liệu khách hàng hoặc dữ liệu nhạy cảm vào repo công khai.
+	•	Không commit file Excel thật vào Git.
+	•	Sử dụng dữ liệu mẫu đã ẩn hoặc thay thế thông tin nhạy cảm khi chia sẻ dự án.
+	•	Kiểm tra chính sách bảo mật của các CDN bên ngoài nếu sử dụng trong môi trường doanh nghiệp.
+
+Giới hạn hiện tại
+	•	Chỉ xử lý sheet đầu tiên của mỗi file Excel.
+	•	Cấu trúc dữ liệu đầu vào phụ thuộc vào vị trí cột.
+	•	Chưa có backend, tài khoản người dùng hoặc phân quyền.
+	•	Chưa có cơ chế lưu lịch sử báo cáo trên máy chủ.
+	•	Kết quả phụ thuộc vào chất lượng và tính nhất quán của dữ liệu BOM/đơn hàng.
+	•	Các thư viện bên ngoài hiện được tải qua CDN nên cần kết nối mạng khi mở ứng dụng lần đầu.
+	•	Đây là công cụ báo cáo vật liệu, không phải hệ thống ERP đầy đủ.
+
+Chạy local
+Vì đây là ứng dụng HTML/CSS/JavaScript tĩnh, có thể chạy bằng một web server đơn giản:
+
+
+ git clone https://github.com/dungnguyenbtsl/BOM.git
+cd BOM
+python3 -m http.server 8000
+ 
+Sau đó mở:
+
+
+ http://localhost:8000
+ 
+Mở trực tiếp file `index.html` cũng có thể hoạt động trong nhiều trình duyệt, nhưng chạy qua web server local được khuyến nghị để có môi trường ổn định hơn.
+
+Cấu trúc repository
+
+ BOM/
+├── index.html       # Giao diện, CSS và logic xử lý chính
+├── README.md        # Tài liệu dự án
+└── .github/
+    └── workflows/   # Cấu hình triển khai GitHub Pages
+ 
+Đóng góp
+Nếu muốn đề xuất cải tiến hoặc báo lỗi:
+
+	1.	Kiểm tra các issue hiện có.
+	2.	Tạo issue mới với:
+	◦	Mô tả vấn đề.
+	◦	Các bước tái hiện.
+	◦	Cấu trúc dữ liệu mẫu không chứa thông tin nhạy cảm.
+	◦	Ảnh chụp màn hình nếu có.
+	3.	Nếu gửi pull request, vui lòng mô tả rõ thay đổi và ảnh hưởng đến quy trình in/xuất báo cáo.
+
+License
+Dự án hiện chưa khai báo license. Nếu muốn cho phép người khác sử dụng, chỉnh sửa hoặc phân phối mã nguồn, hãy bổ sung một file license phù hợp, chẳng hạn MIT License.
+
+Tác giả
+dungnguyenbtsl
+
+	•	Repository: github.com/dungnguyenbtsl/BOM
+	•	Demo: dungnguyenbtsl.github.io/BOM
