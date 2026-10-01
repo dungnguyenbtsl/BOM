@@ -92,6 +92,9 @@ def check_i18n() -> None:
         "en:",
         "localStorage.getItem('bomLanguage')",
         "function changeLanguage()",
+        "function detectBrowserLanguage()",
+        "navigator.languages",
+        "navigator.language",
         "data-i18n=",
     ]
     missing = [snippet for snippet in required if snippet not in html]

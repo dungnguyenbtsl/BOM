@@ -451,7 +451,7 @@ Một pull request nên bao gồm:
 - **Tiếng Việt**.
 - **English**.
 
-Chọn ngôn ngữ trong danh sách `Language` ở thanh điều khiển. Lựa chọn được lưu trong trình duyệt bằng `localStorage` và áp dụng cho nhãn giao diện, thông báo lỗi, báo cáo được tạo, tên file Excel/Word và metadata SEO. Dữ liệu BOM và đơn hàng vẫn được xử lý hoàn toàn ở phía trình duyệt.
+Ngôn ngữ được chọn theo thứ tự ưu tiên: lựa chọn đã lưu trong trình duyệt, ngôn ngữ trình duyệt (`vi`, `en` hoặc `zh`), sau đó mặc định là 繁體中文. Người dùng vẫn có thể đổi thủ công trong danh sách `Language` ở thanh điều khiển; lựa chọn mới được lưu bằng `localStorage` và áp dụng cho nhãn giao diện, thông báo lỗi, báo cáo được tạo, tên file Excel/Word và metadata SEO. Dữ liệu BOM và đơn hàng vẫn được xử lý hoàn toàn ở phía trình duyệt.
 
 ## SEO và hiệu năng
 
