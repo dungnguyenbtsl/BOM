@@ -1,8 +1,0 @@
-blank_issues_enabled: false
-contact_links:
-  - name: Báo cáo vấn đề bảo mật
-    url: https://github.com/dungnguyenbtsl/BOM/security/advisories/new
-    about: Không đăng chi tiết lỗ hổng bảo mật trong issue công khai. Nếu liên kết chưa hoạt động, xem SECURITY.md để biết cách liên hệ riêng.
-  - name: Hướng dẫn đóng góp
-    url: https://github.com/dungnguyenbtsl/BOM/blob/main/CONTRIBUTING.md
-    about: Đọc hướng dẫn về branch, commit, kiểm thử và pull request trước khi đóng góp.
