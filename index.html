@@ -33,6 +33,16 @@ body { font-family: "Microsoft YaHei", Arial, sans-serif; background-color: #f4f
 .control-panel { max-width: 277mm; margin: 0 auto 15px auto; background: #fff; padding: 12px 18px; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; }
 .control-item { display: flex; align-items: center; gap: 6px; font-size: 13px; }
 .language-item { margin-left: auto; }
+.export-history { max-width: 277mm; margin: 0 auto 15px auto; background: #fff; padding: 10px 18px; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.export-history-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.export-history h2 { font-size: 14px; margin: 0; }
+.export-history-list { list-style: none; padding: 0; margin: 8px 0 0; display: grid; gap: 5px; }
+.export-history-list li { display: flex; justify-content: space-between; gap: 12px; padding: 5px 8px; background: #f7f9fb; border-radius: 3px; font-size: 12px; }
+.export-history-list time { color: #6c757d; white-space: nowrap; }
+.history-clear { background: transparent; border: 1px solid #adb5bd; color: #495057; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+.history-clear:hover { background: #e9ecef; }
+.history-download { border: 0; background: transparent; color: #0066cc; cursor: pointer; padding: 0 4px; font-size: 12px; }
+.history-download:disabled { color: #adb5bd; cursor: not-allowed; }
 select, input[type="text"], input[type="file"] { padding: 5px 8px; font-size: 13px; border: 1px solid #ccc; border-radius: 4px; }
 .btn { background-color: #0066cc; color: white; border: none; padding: 6px 14px; font-size: 13px; border-radius: 4px; cursor: pointer; transition: background 0.2s; }
 .btn:hover { background-color: #004d99; }
@@ -119,6 +129,13 @@ border: 0;
 <button class="btn btn-success" onclick="window.print()" data-i18n="printButton">打印</button>
 </div>
 </div>
+<section class="export-history" aria-labelledby="exportHistoryTitle">
+<div class="export-history-header">
+<h2 id="exportHistoryTitle" data-i18n="historyTitle">Lịch sử xuất gần đây</h2>
+<button type="button" class="history-clear" onclick="clearExportHistory()" data-i18n="clearHistory">Xóa lịch sử</button>
+</div>
+<ul id="exportHistoryList" class="export-history-list" aria-live="polite"></ul>
+</section>
 <!-- Khu vực chứa các trang SKU -->
 <div id="pagesContainer">
 <div class="page">
@@ -151,6 +168,7 @@ const translations = {
     noValidData: '未找到有效數據！', missingBom: '型體 {model} 找不到對應的定額數據 (BOM Missing)',
     componentDefault: '部件', modelLabel: '型體', materialCodeLabel: '料號 (Code)', materialNameLabel: '名稱 (Name)', colorLabel: '顏色 (Color)', vendorLabel: '供應商 (Vendor)', unitLabel: '單位 (Unit)', itemLabel: '項次', productionOrderLabel: '生產訂單號', pairsLabel: '數量 (雙)', componentLabel: '部件', usageLabel: '用量', totalUsageLabel: '總用量', subtotalLabel: '小計 (Total)', reportSuccess: '報表生成成功！每個 SKU 已分隔成獨立頁面，各物料獨立成區塊。',
     generateFirst: '請先生成有效的報表！', brandOtherFallback: '未命名',
+    historyTitle: '最近匯出記錄', historyEmpty: '尚未匯出任何檔案。', clearHistory: '清除記錄', downloadAgain: '再次下載', historyExcel: 'Excel', historyWord: 'Word',
     metaDescription: 'BOM 生產用料計算工具：從 BOM 與訂單 Excel 計算 SKU 物料需求，並產生可列印及可匯出的報表。',
     excelFilename: 'BOM_生產用料明細計算表.xlsx', wordFilename: 'BOM_生產用料明細計算表.docx', metaTitle: 'BOM 生產用料明細計算表｜SKU 物料需求報表', metaOgDescription: '從 BOM 與訂單 Excel 計算 SKU 物料需求，產生可列印、Excel 及 Word 報表。'
   },
@@ -168,6 +186,7 @@ const translations = {
     noValidData: 'Không tìm thấy dữ liệu hợp lệ!', missingBom: 'Không tìm thấy định mức cho model {model}',
     componentDefault: 'Bộ phận', modelLabel: 'Model', materialCodeLabel: 'Mã', materialNameLabel: 'Tên', colorLabel: 'Màu', vendorLabel: 'Nhà cung cấp', unitLabel: 'Đơn vị', itemLabel: 'STT', productionOrderLabel: 'Lệnh sản xuất', pairsLabel: 'Số đôi', componentLabel: 'Bộ phận', usageLabel: 'Định mức', totalUsageLabel: 'Tổng nhu cầu', subtotalLabel: 'Tổng', reportSuccess: 'Đã tạo báo cáo! Mỗi SKU nằm trên một trang và mỗi vật liệu là một nhóm riêng.',
     generateFirst: 'Vui lòng tạo báo cáo hợp lệ trước!', brandOtherFallback: 'Chưa đặt tên',
+    historyTitle: 'Lịch sử xuất gần đây', historyEmpty: 'Chưa có file nào được xuất.', clearHistory: 'Xóa lịch sử', downloadAgain: 'Tải lại', historyExcel: 'Excel', historyWord: 'Word',
     metaDescription: 'Công cụ BOM tính nhu cầu vật liệu theo SKU từ file định mức và đơn hàng Excel, hỗ trợ xuất báo cáo và in A4.',
     excelFilename: 'BOM_bao-cao-nhu-cau-vat-lieu.xlsx', wordFilename: 'BOM_bao-cao-nhu-cau-vat-lieu.docx', metaTitle: 'BOM — Báo cáo nhu cầu vật liệu theo SKU', metaOgDescription: 'Tính nhu cầu vật liệu sản xuất từ BOM và đơn hàng Excel, xuất Excel, Word hoặc in A4.'
   },
@@ -185,6 +204,7 @@ const translations = {
     noValidData: 'No valid data found!', missingBom: 'No BOM definition found for model {model}',
     componentDefault: 'Component', modelLabel: 'Model', materialCodeLabel: 'Code', materialNameLabel: 'Name', colorLabel: 'Color', vendorLabel: 'Vendor', unitLabel: 'Unit', itemLabel: 'No.', productionOrderLabel: 'Production order', pairsLabel: 'Pairs', componentLabel: 'Component', usageLabel: 'Usage', totalUsageLabel: 'Total usage', subtotalLabel: 'Subtotal', reportSuccess: 'Report generated! Each SKU is on a separate page and each material is grouped.',
     generateFirst: 'Please generate a valid report first!', brandOtherFallback: 'Unnamed',
+    historyTitle: 'Recent exports', historyEmpty: 'No files have been exported yet.', clearHistory: 'Clear history', downloadAgain: 'Download again', historyExcel: 'Excel', historyWord: 'Word',
     metaDescription: 'Calculate SKU-level production material requirements from BOM and order Excel files, then export or print reports.',
     excelFilename: 'BOM_SKU_material_report.xlsx', wordFilename: 'BOM_SKU_material_report.docx', metaTitle: 'BOM — SKU Production Material Requirement Report', metaOgDescription: 'Calculate material requirements from BOM and order Excel files, then export Excel, Word or print-ready reports.'
   }
@@ -214,6 +234,79 @@ function refreshStatuses() {
   if (masterStatus) masterStatus.innerText = masterRowCount ? t('masterLoaded', {count: masterRowCount}) : t('notSelected');
   if (orderStatus) orderStatus.innerText = orderCount ? t('orderLoaded', {count: orderCount}) : t('notSelected');
 }
+const EXPORT_HISTORY_KEY = 'bomExportHistory';
+const EXPORT_HISTORY_LIMIT = 10;
+function readExportHistory() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(EXPORT_HISTORY_KEY) || '[]');
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (error) {
+    return [];
+  }
+}
+function renderExportHistory() {
+  const list = document.getElementById('exportHistoryList');
+  if (!list) return;
+  list.innerHTML = '';
+  const history = readExportHistory();
+  if (!history.length) {
+    const empty = document.createElement('li');
+    empty.textContent = t('historyEmpty');
+    list.appendChild(empty);
+    return;
+  }
+  history.forEach(entry => {
+    const item = document.createElement('li');
+    const name = document.createElement('span');
+    name.textContent = `${entry.type === 'excel' ? t('historyExcel') : t('historyWord')}: ${entry.filename}`;
+    const time = document.createElement('time');
+    time.dateTime = entry.timestamp;
+    time.textContent = new Intl.DateTimeFormat(currentLanguage, {dateStyle: 'medium', timeStyle: 'short'}).format(new Date(entry.timestamp));
+    const download = document.createElement('button');
+    download.type = 'button';
+    download.className = 'history-download';
+    download.textContent = t('downloadAgain');
+    download.disabled = !entry.content;
+    download.onclick = () => downloadStoredExport(history.indexOf(entry));
+    item.append(name, time, download);
+    list.appendChild(item);
+  });
+}
+function downloadStoredExport(index) {
+  const entry = readExportHistory()[index];
+  if (!entry || !entry.content) return;
+  const link = document.createElement('a');
+  link.href = entry.content;
+  link.download = entry.filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+}
+function persistExportHistory(history) {
+  const limited = history.slice(0, EXPORT_HISTORY_LIMIT);
+  for (let count = limited.length; count > 0; count--) {
+    try {
+      localStorage.removeItem(EXPORT_HISTORY_KEY);
+      localStorage.setItem(EXPORT_HISTORY_KEY, JSON.stringify(limited.slice(0, count)));
+      return true;
+    } catch (error) {}
+  }
+  return false;
+}
+function recordExport(type, filename, content) {
+  const history = readExportHistory().filter(entry => entry.filename !== filename);
+  history.unshift({type, filename, content, timestamp: new Date().toISOString()});
+  if (!persistExportHistory(history)) {
+    // Keep metadata if the browser quota cannot fit the file content.
+    persistExportHistory(history.map(({content: savedContent, ...entry}) => entry));
+  }
+  renderExportHistory();
+}
+function clearExportHistory() {
+  try { localStorage.removeItem(EXPORT_HISTORY_KEY); } catch (error) {}
+  renderExportHistory();
+}
+
 function applyLanguage() {
   document.documentElement.lang = currentLanguage === 'vi' ? 'vi' : currentLanguage;
   document.title = t('metaTitle');
@@ -232,6 +325,7 @@ function applyLanguage() {
   const selector = document.getElementById('languageSelect');
   if (selector) selector.value = currentLanguage;
   refreshStatuses();
+  renderExportHistory();
 }
 function changeLanguage() {
   currentLanguage = document.getElementById('languageSelect').value;
@@ -450,7 +544,11 @@ let tables = page.querySelectorAll('table');
 let ws = XLSX.utils.table_to_sheet(page);
 XLSX.utils.book_append_sheet(wb, ws, skuTitle.replace(/[^a-zA-Z0-9]/g, "_").substring(0, 31));
 });
-XLSX.writeFile(wb, t('excelFilename'));
+const filename = t('excelFilename');
+const base64 = XLSX.write(wb, {bookType: 'xlsx', type: 'base64'});
+const content = `data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,${base64}`;
+XLSX.writeFile(wb, filename);
+recordExport('excel', filename, content);
 }
 function exportToWord() {
 let containerHTML = document.getElementById('pagesContainer').innerHTML;
@@ -464,8 +562,12 @@ let a = document.createElement('a');
 a.href = url;
 a.download = t('wordFilename');
 document.body.appendChild(a);
+const filename = a.download;
 a.click();
 document.body.removeChild(a);
+const reader = new FileReader();
+reader.onload = () => recordExport('word', filename, reader.result);
+reader.readAsDataURL(converted);
 URL.revokeObjectURL(url);
 }
 applyLanguage();

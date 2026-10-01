@@ -443,6 +443,10 @@ Một pull request nên bao gồm:
 - Ảnh hưởng đến định dạng Excel hoặc bản in.
 - Xác nhận không đưa dữ liệu sản xuất thật vào commit.
 
+## Lịch sử xuất file gần đây
+
+Sau mỗi lần xuất Excel hoặc Word, BOM lưu tối đa **10 bản ghi gần nhất** trong `localStorage`, gồm loại file, tên file, thời gian xuất và nội dung file dạng data URL để có thể bấm **Tải lại / Download again**. Nội dung BOM và đơn hàng nguồn không được lưu riêng ngoài nội dung file xuất mà người dùng đã yêu cầu tạo. Vì `localStorage` có giới hạn dung lượng, ứng dụng sẽ tự loại bản ghi cũ nhất khi cần; nếu file quá lớn, vẫn giữ metadata để không làm gián đoạn tải file. Người dùng có thể đổi ngôn ngữ để xem thời gian và nhãn lịch sử theo ngôn ngữ tương ứng, hoặc bấm **Xóa lịch sử** để xóa toàn bộ bản ghi trên trình duyệt hiện tại.
+
 ## Đa ngôn ngữ
 
 Ứng dụng hỗ trợ chuyển đổi giao diện giữa ba ngôn ngữ:

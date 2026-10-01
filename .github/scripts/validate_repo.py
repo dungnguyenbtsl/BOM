@@ -95,6 +95,12 @@ def check_i18n() -> None:
         "function detectBrowserLanguage()",
         "navigator.languages",
         "navigator.language",
+        "bomExportHistory",
+        "recordExport(",
+        "downloadStoredExport(",
+        "persistExportHistory(",
+        "renderExportHistory()",
+        "clearExportHistory()",
         "data-i18n=",
     ]
     missing = [snippet for snippet in required if snippet not in html]
