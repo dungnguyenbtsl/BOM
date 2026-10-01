@@ -83,6 +83,23 @@ def check_seo_metadata() -> None:
     print("OK: SEO metadata, robots.txt, and sitemap.xml checks passed")
 
 
+def check_i18n() -> None:
+    html = (ROOT / "index.html").read_text(encoding="utf-8")
+    required = [
+        'id="languageSelect"',
+        "'zh-TW'",
+        "vi:",
+        "en:",
+        "localStorage.getItem('bomLanguage')",
+        "function changeLanguage()",
+        "data-i18n=",
+    ]
+    missing = [snippet for snippet in required if snippet not in html]
+    if missing:
+        fail("multilingual UI configuration is incomplete: " + ", ".join(missing))
+    print("OK: multilingual UI configuration checks passed")
+
+
 def check_inline_javascript() -> None:
     html = (ROOT / "index.html").read_text(encoding="utf-8")
     scripts = re.findall(r"<script\b[^>]*>(.*?)</script>", html, re.IGNORECASE | re.DOTALL)
@@ -153,6 +170,7 @@ def main() -> None:
     check_required_files()
     check_html()
     check_seo_metadata()
+    check_i18n()
     check_inline_javascript()
     check_sensitive_files()
     check_readme_links()

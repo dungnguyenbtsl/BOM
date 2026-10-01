@@ -443,6 +443,16 @@ Một pull request nên bao gồm:
 - Ảnh hưởng đến định dạng Excel hoặc bản in.
 - Xác nhận không đưa dữ liệu sản xuất thật vào commit.
 
+## Đa ngôn ngữ
+
+Ứng dụng hỗ trợ chuyển đổi giao diện giữa ba ngôn ngữ:
+
+- **繁體中文** — ngôn ngữ mặc định.
+- **Tiếng Việt**.
+- **English**.
+
+Chọn ngôn ngữ trong danh sách `Language` ở thanh điều khiển. Lựa chọn được lưu trong trình duyệt bằng `localStorage` và áp dụng cho nhãn giao diện, thông báo lỗi, báo cáo được tạo, tên file Excel/Word và metadata SEO. Dữ liệu BOM và đơn hàng vẫn được xử lý hoàn toàn ở phía trình duyệt.
+
 ## SEO và hiệu năng
 
 Trang public sử dụng canonical URL `https://dungnguyenbtsl.github.io/BOM/`, metadata Open Graph/Twitter Card, `robots.txt` và `sitemap.xml`. Logo được lưu local trong `assets/logo.jpeg` để tránh phụ thuộc cross-repository. Các thư viện Excel/Word được tải bằng `defer` để giảm chặn render ban đầu.

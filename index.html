@@ -32,6 +32,7 @@
 body { font-family: "Microsoft YaHei", Arial, sans-serif; background-color: #f4f6f9; margin: 0; padding: 15px; color: #333; }
 .control-panel { max-width: 277mm; margin: 0 auto 15px auto; background: #fff; padding: 12px 18px; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; }
 .control-item { display: flex; align-items: center; gap: 6px; font-size: 13px; }
+.language-item { margin-left: auto; }
 select, input[type="text"], input[type="file"] { padding: 5px 8px; font-size: 13px; border: 1px solid #ccc; border-radius: 4px; }
 .btn { background-color: #0066cc; color: white; border: none; padding: 6px 14px; font-size: 13px; border-radius: 4px; cursor: pointer; transition: background 0.2s; }
 .btn:hover { background-color: #004d99; }
@@ -79,35 +80,43 @@ border: 0;
 </style>
 </head>
 <body>
-<h1 class="sr-only">BOM 生產用料明細計算表</h1>
+<h1 class="sr-only" data-i18n="pageHeading">BOM 生產用料明細計算表</h1>
 <noscript>
-<p>此工具需要啟用 JavaScript，才能讀取 BOM 與訂單 Excel 檔案並產生物料需求報表。</p>
+<p data-i18n="noscriptMessage">此工具需要啟用 JavaScript，才能讀取 BOM 與訂單 Excel 檔案並產生物料需求報表。</p>
 </noscript>
 <div class="control-panel">
 <div class="control-item">
-<label><b>品牌 (Brand):</b></label>
+<label for="languageSelect"><b data-i18n="languageLabel">語言:</b></label>
+<select id="languageSelect" onchange="changeLanguage()" aria-label="Language">
+<option value="zh-TW">繁體中文</option>
+<option value="vi">Tiếng Việt</option>
+<option value="en">English</option>
+</select>
+</div>
+<div class="control-item">
+<label for="brandSelect"><b data-i18n="brandLabel">品牌:</b></label>
 <select id="brandSelect" onchange="updateBrandTitle()">
 <option value="KEEN">KEEN</option>
 <option value="SAUCONY">SAUCONY</option>
 <option value="KOLON">KOLON</option>
 <option value="BLACKYAK">BLACKYAK</option>
-<option value="OTHER">其他</option>
+<option value="OTHER" data-i18n="otherBrand">其他</option>
 </select>
-<input type="text" id="customBrandInput" placeholder="輸入品牌" style="display:none; width:90px;" oninput="updateBrandTitle()">
+<input type="text" id="customBrandInput" placeholder="輸入品牌" data-i18n-placeholder="customBrandPlaceholder" style="display:none; width:90px;" oninput="updateBrandTitle()">
 </div>
 <div class="control-item">
-<label><b>定額庫 (BOM):</b> <span id="masterStatus" style="color:red; font-size:11px;">(未選)</span></label>
+<label for="masterFile"><b data-i18n="masterLabel">定額庫 (BOM):</b> <span id="masterStatus" data-i18n="notSelected" style="color:red; font-size:11px;">(未選)</span></label>
 <input type="file" id="masterFile" accept=".xlsx, .xls" onchange="loadMasterDB(event)" style="width: 130px;">
 </div>
 <div class="control-item">
-<label><b>訂單文件 (Orders):</b> <span id="orderStatus" style="color:red; font-size:11px;">(未選)</span></label>
+<label for="orderFile"><b data-i18n="orderLabel">訂單文件 (Orders):</b> <span id="orderStatus" data-i18n="notSelected" style="color:red; font-size:11px;">(未選)</span></label>
 <input type="file" id="orderFile" accept=".xlsx, .xls" onchange="loadOrderFile(event)" style="width: 130px;">
 </div>
 <div class="control-item">
-<button class="btn" onclick="processOrderList()">生成報表 (Generate)</button>
-<button class="btn btn-excel" onclick="exportToExcel()">導出 Excel</button>
-<button class="btn btn-word" onclick="exportToWord()">導出 Word</button>
-<button class="btn btn-success" onclick="window.print()">打印 (Print)</button>
+<button class="btn" onclick="processOrderList()" data-i18n="generateButton">生成報表</button>
+<button class="btn btn-excel" onclick="exportToExcel()" data-i18n="exportExcelButton">導出 Excel</button>
+<button class="btn btn-word" onclick="exportToWord()" data-i18n="exportWordButton">導出 Word</button>
+<button class="btn btn-success" onclick="window.print()" data-i18n="printButton">打印</button>
 </div>
 </div>
 <!-- Khu vực chứa các trang SKU -->
@@ -118,24 +127,116 @@ border: 0;
 <img src="assets/logo.jpeg" width="100" height="40" alt="BOM company logo" decoding="async">
 </div>
 <div class="title-box">
-<h2>生產用料明細計算表</h2>
+<h2 data-i18n="reportTitle">生產用料明細計算表</h2>
 <div class="subtitle" id="brandTitle">KEEN</div>
 </div>
-<div class="sku-title">請上傳文件</div>
+<div class="sku-title" data-i18n="uploadFiles">請上傳文件</div>
 </div>
-<div style="color: #777; padding: 30px; text-align: center;">請上傳定額庫與訂單文件後點擊「生成報表」...</div>
+<div style="color: #777; padding: 30px; text-align: center;" data-i18n="uploadInstruction">請上傳定額庫與訂單文件後點擊「生成報表」...</div>
 </div>
 </div>
 <script>
+const translations = {
+  'zh-TW': {
+    languageLabel: '語言:', brandLabel: '品牌:', otherBrand: '其他',
+    customBrandPlaceholder: '輸入品牌', masterLabel: '定額庫 (BOM):', orderLabel: '訂單文件 (Orders):',
+    notSelected: '(未選)', generateButton: '生成報表', exportExcelButton: '導出 Excel',
+    exportWordButton: '導出 Word', printButton: '打印', pageHeading: 'BOM 生產用料明細計算表',
+    noscriptMessage: '此工具需要啟用 JavaScript，才能讀取 BOM 與訂單 Excel 檔案並產生物料需求報表。',
+    reportTitle: '生產用料明細計算表', uploadFiles: '請上傳文件',
+    uploadInstruction: '請上傳定額庫與訂單文件後點擊「生成報表」...',
+    masterLoaded: '(已載入 {count} 筆)', orderLoaded: '(已載入 {count} 單)',
+    masterError: '讀取定額庫錯誤: {message}', orderError: '讀取訂單文件錯誤: {message}',
+    uploadMasterFirst: '請先上傳定額庫！', uploadOrderFirst: '請先上傳訂單文件！',
+    noValidData: '未找到有效數據！', missingBom: '型體 {model} 找不到對應的定額數據 (BOM Missing)',
+    componentDefault: '部件', modelLabel: '型體', materialCodeLabel: '料號 (Code)', materialNameLabel: '名稱 (Name)', colorLabel: '顏色 (Color)', vendorLabel: '供應商 (Vendor)', unitLabel: '單位 (Unit)', itemLabel: '項次', productionOrderLabel: '生產訂單號', pairsLabel: '數量 (雙)', componentLabel: '部件', usageLabel: '用量', totalUsageLabel: '總用量', subtotalLabel: '小計 (Total)', reportSuccess: '報表生成成功！每個 SKU 已分隔成獨立頁面，各物料獨立成區塊。',
+    generateFirst: '請先生成有效的報表！', brandOtherFallback: '未命名',
+    metaDescription: 'BOM 生產用料計算工具：從 BOM 與訂單 Excel 計算 SKU 物料需求，並產生可列印及可匯出的報表。',
+    excelFilename: 'BOM_生產用料明細計算表.xlsx', wordFilename: 'BOM_生產用料明細計算表.docx', metaTitle: 'BOM 生產用料明細計算表｜SKU 物料需求報表', metaOgDescription: '從 BOM 與訂單 Excel 計算 SKU 物料需求，產生可列印、Excel 及 Word 報表。'
+  },
+  vi: {
+    languageLabel: 'Ngôn ngữ:', brandLabel: 'Thương hiệu:', otherBrand: 'Khác',
+    customBrandPlaceholder: 'Nhập thương hiệu', masterLabel: 'File định mức (BOM):', orderLabel: 'File đơn hàng:',
+    notSelected: '(Chưa chọn)', generateButton: 'Tạo báo cáo', exportExcelButton: 'Xuất Excel',
+    exportWordButton: 'Xuất Word', printButton: 'In', pageHeading: 'Bảng tính nhu cầu vật liệu BOM',
+    noscriptMessage: 'Công cụ cần JavaScript để đọc file BOM, file đơn hàng Excel và tạo báo cáo nhu cầu vật liệu.',
+    reportTitle: 'Báo cáo nhu cầu vật liệu sản xuất', uploadFiles: 'Chưa có file',
+    uploadInstruction: 'Tải file định mức và file đơn hàng, sau đó nhấn “Tạo báo cáo”.',
+    masterLoaded: '(Đã tải {count} dòng)', orderLoaded: '(Đã tải {count} đơn)',
+    masterError: 'Lỗi đọc file định mức: {message}', orderError: 'Lỗi đọc file đơn hàng: {message}',
+    uploadMasterFirst: 'Vui lòng tải file định mức trước!', uploadOrderFirst: 'Vui lòng tải file đơn hàng trước!',
+    noValidData: 'Không tìm thấy dữ liệu hợp lệ!', missingBom: 'Không tìm thấy định mức cho model {model}',
+    componentDefault: 'Bộ phận', modelLabel: 'Model', materialCodeLabel: 'Mã', materialNameLabel: 'Tên', colorLabel: 'Màu', vendorLabel: 'Nhà cung cấp', unitLabel: 'Đơn vị', itemLabel: 'STT', productionOrderLabel: 'Lệnh sản xuất', pairsLabel: 'Số đôi', componentLabel: 'Bộ phận', usageLabel: 'Định mức', totalUsageLabel: 'Tổng nhu cầu', subtotalLabel: 'Tổng', reportSuccess: 'Đã tạo báo cáo! Mỗi SKU nằm trên một trang và mỗi vật liệu là một nhóm riêng.',
+    generateFirst: 'Vui lòng tạo báo cáo hợp lệ trước!', brandOtherFallback: 'Chưa đặt tên',
+    metaDescription: 'Công cụ BOM tính nhu cầu vật liệu theo SKU từ file định mức và đơn hàng Excel, hỗ trợ xuất báo cáo và in A4.',
+    excelFilename: 'BOM_bao-cao-nhu-cau-vat-lieu.xlsx', wordFilename: 'BOM_bao-cao-nhu-cau-vat-lieu.docx', metaTitle: 'BOM — Báo cáo nhu cầu vật liệu theo SKU', metaOgDescription: 'Tính nhu cầu vật liệu sản xuất từ BOM và đơn hàng Excel, xuất Excel, Word hoặc in A4.'
+  },
+  en: {
+    languageLabel: 'Language:', brandLabel: 'Brand:', otherBrand: 'Other',
+    customBrandPlaceholder: 'Enter brand', masterLabel: 'BOM master file:', orderLabel: 'Order file:',
+    notSelected: '(Not selected)', generateButton: 'Generate report', exportExcelButton: 'Export Excel',
+    exportWordButton: 'Export Word', printButton: 'Print', pageHeading: 'BOM Production Material Requirement Calculator',
+    noscriptMessage: 'JavaScript is required to read BOM and order Excel files and generate the material requirement report.',
+    reportTitle: 'Production Material Requirement Report', uploadFiles: 'Upload files',
+    uploadInstruction: 'Upload the BOM master and order files, then select “Generate report”.',
+    masterLoaded: '({count} rows loaded)', orderLoaded: '({count} orders loaded)',
+    masterError: 'Error reading BOM master: {message}', orderError: 'Error reading order file: {message}',
+    uploadMasterFirst: 'Please upload the BOM master file first!', uploadOrderFirst: 'Please upload the order file first!',
+    noValidData: 'No valid data found!', missingBom: 'No BOM definition found for model {model}',
+    componentDefault: 'Component', modelLabel: 'Model', materialCodeLabel: 'Code', materialNameLabel: 'Name', colorLabel: 'Color', vendorLabel: 'Vendor', unitLabel: 'Unit', itemLabel: 'No.', productionOrderLabel: 'Production order', pairsLabel: 'Pairs', componentLabel: 'Component', usageLabel: 'Usage', totalUsageLabel: 'Total usage', subtotalLabel: 'Subtotal', reportSuccess: 'Report generated! Each SKU is on a separate page and each material is grouped.',
+    generateFirst: 'Please generate a valid report first!', brandOtherFallback: 'Unnamed',
+    metaDescription: 'Calculate SKU-level production material requirements from BOM and order Excel files, then export or print reports.',
+    excelFilename: 'BOM_SKU_material_report.xlsx', wordFilename: 'BOM_SKU_material_report.docx', metaTitle: 'BOM — SKU Production Material Requirement Report', metaOgDescription: 'Calculate material requirements from BOM and order Excel files, then export Excel, Word or print-ready reports.'
+  }
+};
+let currentLanguage = localStorage.getItem('bomLanguage') || 'zh-TW';
+function t(key, variables = {}) {
+  let text = (translations[currentLanguage] && translations[currentLanguage][key]) || translations['en'][key] || key;
+  Object.entries(variables).forEach(([name, value]) => { text = text.replaceAll(`{${name}}`, String(value)); });
+  return text;
+}
+function refreshStatuses() {
+  const masterStatus = document.getElementById('masterStatus');
+  const orderStatus = document.getElementById('orderStatus');
+  if (masterStatus) masterStatus.innerText = masterRowCount ? t('masterLoaded', {count: masterRowCount}) : t('notSelected');
+  if (orderStatus) orderStatus.innerText = orderCount ? t('orderLoaded', {count: orderCount}) : t('notSelected');
+}
+function applyLanguage() {
+  document.documentElement.lang = currentLanguage === 'vi' ? 'vi' : currentLanguage;
+  document.title = t('metaTitle');
+  document.querySelectorAll('[data-i18n]').forEach(el => { el.innerText = t(el.dataset.i18n); });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { el.placeholder = t(el.dataset.i18nPlaceholder); });
+  const description = document.querySelector('meta[name="description"]');
+  const ogDescription = document.querySelector('meta[property="og:description"]');
+  const title = document.querySelector('meta[property="og:title"]');
+  const twitterTitle = document.querySelector('meta[name="twitter:title"]');
+  const twitterDescription = document.querySelector('meta[name="twitter:description"]');
+  if (description) description.content = t('metaDescription');
+  if (ogDescription) ogDescription.content = t('metaOgDescription');
+  if (title) title.content = t('metaTitle');
+  if (twitterTitle) twitterTitle.content = t('metaTitle');
+  if (twitterDescription) twitterDescription.content = t('metaOgDescription');
+  const selector = document.getElementById('languageSelect');
+  if (selector) selector.value = currentLanguage;
+  refreshStatuses();
+}
+function changeLanguage() {
+  currentLanguage = document.getElementById('languageSelect').value;
+  localStorage.setItem('bomLanguage', currentLanguage);
+  applyLanguage();
+  if (Object.keys(masterDB).length && orderRowsData.length) processOrderList(false);
+}
 let masterDB = {};
 let orderRowsData = [];
+let masterRowCount = 0;
+let orderCount = 0;
 function updateBrandTitle() {
 let select = document.getElementById('brandSelect');
 let customInput = document.getElementById('customBrandInput');
 let brandName = select.value;
 if (brandName === "OTHER") {
 customInput.style.display = "inline-block";
-brandName = customInput.value.trim() || "未命名";
+brandName = customInput.value.trim() || t('brandOtherFallback');
 } else {
 customInput.style.display = "none";
 }
@@ -160,7 +261,7 @@ for (let i = 1; i < rows.length; i++) {
 let r = rows[i];
 if (!r || r.length < 14) continue;
 let model = r[0] ? String(r[0]).trim() : '';
-let component = r[5] ? String(r[5]).trim() : '部件';
+let component = r[5] ? String(r[5]).trim() : t('componentDefault');
 let matCode = r[6] ? String(r[6]).trim() : '';
 let matName = r[7] ? String(r[7]).trim() : '';
 let unit = r[9] ? String(r[9]).trim() : (r[8] ? String(r[8]).trim() : 'Yard');
@@ -183,10 +284,11 @@ rate: rate
 count++;
 }
 }
-document.getElementById('masterStatus').innerText = `(已加载 ${count} 条)`;
+masterRowCount = count;
+refreshStatuses();
 document.getElementById('masterStatus').style.color = 'green';
 } catch (err) {
-alert("读取定额库出错: " + err.message);
+alert(t('masterError', {message: err.message}));
 }
 };
 reader.readAsArrayBuffer(file);
@@ -214,26 +316,27 @@ if (model && order) {
 orderRowsData.push({model, order, pairs});
 }
 }
-document.getElementById('orderStatus').innerText = `(已加载 ${orderRowsData.length} 单)`;
+orderCount = orderRowsData.length;
+refreshStatuses();
 document.getElementById('orderStatus').style.color = 'green';
 } catch (err) {
-alert("读取订单文件出错: " + err.message);
+alert(t('orderError', {message: err.message}));
 }
 };
 reader.readAsArrayBuffer(file);
 }
-function processOrderList() {
+function processOrderList(showSuccess = true) {
 if (Object.keys(masterDB).length === 0) {
-alert("請先上傳定額庫！");
+alert(t('uploadMasterFirst'));
 return;
 }
 if (orderRowsData.length === 0) {
-alert("請先上傳訂單文件！");
+alert(t('uploadOrderFirst'));
 return;
 }
 let brandSelect = document.getElementById('brandSelect');
 let customInput = document.getElementById('customBrandInput');
-let brandName = brandSelect.value === "OTHER" ? (customInput.value.trim() || "未命名") : brandSelect.value;
+let brandName = brandSelect.value === "OTHER" ? (customInput.value.trim() || t('brandOtherFallback')) : brandSelect.value;
 // Gom nhóm đơn hàng theo SKU (Model)
 let skuMap = {};
 for (let row of orderRowsData) {
@@ -247,7 +350,7 @@ let container = document.getElementById('pagesContainer');
 container.innerHTML = '';
 let skuKeys = Object.keys(skuMap);
 if (skuKeys.length === 0) {
-container.innerHTML = `<div class="page"><div class="missing-data">未找到有效数据！</div></div>`;
+container.innerHTML = `<div class="page"><div class="missing-data">${t('noValidData')}</div></div>`;
 return;
 }
 for (let model of skuKeys) {
@@ -255,9 +358,9 @@ let ordersOfSku = skuMap[model];
 let bomList = masterDB[model];
 let pageDiv = document.createElement('div');
 pageDiv.className = 'page';
-let headerHTML = `<div class="header-container"> <div class="logo-box"> <img src="assets/logo.jpeg" width="100" height="40" alt="BOM company logo" decoding="async"> </div> <div class="title-box"> <h2>生產用料明細計算表</h2> <div class="subtitle subtitle-brand">${brandName}</div> </div> <div class="sku-title">型體: ${model}</div> </div>`;
+let headerHTML = `<div class="header-container"> <div class="logo-box"> <img src="assets/logo.jpeg" width="100" height="40" alt="BOM company logo" decoding="async"> </div> <div class="title-box"> <h2>${t('reportTitle')}</h2> <div class="subtitle subtitle-brand">${brandName}</div> </div> <div class="sku-title">${t('modelLabel')}: ${model}</div> </div>`;
 if (!bomList) {
-pageDiv.innerHTML = headerHTML + `<div class="missing-data">型體 ${model} 找不到對應的定額數據 (BOM Missing)</div>`;
+pageDiv.innerHTML = headerHTML + `<div class="missing-data">${t('missingBom', {model})}</div>`;
 container.appendChild(pageDiv);
 continue;
 }
@@ -281,13 +384,13 @@ let bodyContent = headerHTML;
 // Duyệt qua từng vật liệu riêng biệt để tạo một bảng riêng biệt
 for (let mKey in materialGroups) {
 let mat = materialGroups[mKey];
-bodyContent += `<div class="material-section"> <div class="material-header"> <div>料號 (Code): <b>${mat.materialCode}</b> | 名稱 (Name): <b>${mat.materialName}</b></div> <div>顏色 (Color): <b>${mat.materialColor}</b> | 供應商 (Vendor): <b>${mat.vendor}</b> | 單位 (Unit): <b>${mat.materialUnit}</b></div> </div> <table> <thead> <tr> <th style="width: 5%;">項次</th> <th style="width: 15%;">生產訂單號</th> <th style="width: 10%;">數量 (雙)</th>`;
+bodyContent += `<div class="material-section"> <div class="material-header"> <div>${t('materialCodeLabel')}: <b>${mat.materialCode}</b> | ${t('materialNameLabel')}: <b>${mat.materialName}</b></div> <div>${t('colorLabel')}: <b>${mat.materialColor}</b> | ${t('vendorLabel')}: <b>${mat.vendor}</b> | ${t('unitLabel')}: <b>${mat.materialUnit}</b></div> </div> <table> <thead> <tr> <th style="width: 5%;">${t('itemLabel')}</th> <th style="width: 15%;">${t('productionOrderLabel')}</th> <th style="width: 10%;">${t('pairsLabel')}</th>`;
 // Tạo tiêu đề cột cho từng 部件 (Component) của vật liệu này
 let compNames = Object.keys(mat.components);
 for (let cName of compNames) {
-bodyContent += `<th>部件: ${cName} (用量)</th>`;
+bodyContent += `<th>${t('componentLabel')}: ${cName} (${t('usageLabel')})</th>`;
 }
-bodyContent += `<th style="width: 12%;">總用量</th> </tr> </thead> <tbody>`;
+bodyContent += `<th style="width: 12%;">${t('totalUsageLabel')}</th> </tr> </thead> <tbody>`;
 let stt = 1;
 let totalMatForSku = 0;
 let totalPairsForSku = 0;
@@ -309,7 +412,7 @@ totalMatForSku += rowSum;
 bodyContent += `<td class="right"><b>${rowSum.toFixed(2)}</b></td> </tr>`;
 }
 // Dòng tổng kết cho vật liệu này
-bodyContent += `<tr style="background-color: #fafafa; font-weight: bold;"> <td colspan="2">小計 (Total)</td> <td class="right">${totalPairsForSku.toLocaleString()}</td>`;
+bodyContent += `<tr style="background-color: #fafafa; font-weight: bold;"> <td colspan="2">${t('subtotalLabel')}</td> <td class="right">${totalPairsForSku.toLocaleString()}</td>`;
 for (let cName of compNames) {
 bodyContent += `<td class="right">${compTotals[cName].toFixed(2)}</td>`;
 }
@@ -318,12 +421,12 @@ bodyContent += `<td class="right" style="color: #c0392b;">${totalMatForSku.toFix
 pageDiv.innerHTML = bodyContent;
 container.appendChild(pageDiv);
 }
-alert("報表生成成功！每個 SKU 已分隔成獨立頁面，各物料獨立成區塊。");
+if (showSuccess) alert(t('reportSuccess'));
 }
 function exportToExcel() {
 let pages = document.querySelectorAll('.page');
 if (pages.length === 0 || document.querySelector('.missing-data')) {
-alert("請先生成有效的報表！");
+alert(t('generateFirst'));
 return;
 }
 let wb = XLSX.utils.book_new();
@@ -334,7 +437,7 @@ let tables = page.querySelectorAll('table');
 let ws = XLSX.utils.table_to_sheet(page);
 XLSX.utils.book_append_sheet(wb, ws, skuTitle.replace(/[^a-zA-Z0-9]/g, "_").substring(0, 31));
 });
-XLSX.writeFile(wb, "生產用料明細計算表_按SKU.xlsx");
+XLSX.writeFile(wb, t('excelFilename'));
 }
 function exportToWord() {
 let containerHTML = document.getElementById('pagesContainer').innerHTML;
@@ -346,12 +449,13 @@ margins: { top: 720, bottom: 720, left: 720, right: 720 }
 let url = URL.createObjectURL(converted);
 let a = document.createElement('a');
 a.href = url;
-a.download = '生產用料明細計算表_按SKU.docx';
+a.download = t('wordFilename');
 document.body.appendChild(a);
 a.click();
 document.body.removeChild(a);
 URL.revokeObjectURL(url);
 }
+applyLanguage();
 </script>
 </body>
 </html>
