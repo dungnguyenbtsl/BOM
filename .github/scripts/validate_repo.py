@@ -25,6 +25,8 @@ REQUIRED_FILES = [
     "robots.txt",
     "sitemap.xml",
     "assets/logo.jpeg",
+    "assets/css/styles.css",
+    "assets/js/app.js",
 ]
 
 
@@ -85,6 +87,8 @@ def check_seo_metadata() -> None:
 
 def check_i18n() -> None:
     html = (ROOT / "index.html").read_text(encoding="utf-8")
+    app_js = (ROOT / "assets/js/app.js").read_text(encoding="utf-8")
+    source = html + "\n" + app_js
     required = [
         'id="languageSelect"',
         "'zh-TW'",
@@ -103,37 +107,30 @@ def check_i18n() -> None:
         "clearExportHistory()",
         "data-i18n=",
     ]
-    missing = [snippet for snippet in required if snippet not in html]
+    missing = [snippet for snippet in required if snippet not in source]
     if missing:
         fail("multilingual UI configuration is incomplete: " + ", ".join(missing))
     print("OK: multilingual UI configuration checks passed")
 
 
-def check_inline_javascript() -> None:
+def check_external_javascript() -> None:
     html = (ROOT / "index.html").read_text(encoding="utf-8")
-    scripts = re.findall(r"<script\b[^>]*>(.*?)</script>", html, re.IGNORECASE | re.DOTALL)
-    inline_scripts = [script for script in scripts if script.strip()]
-
-    if not inline_scripts:
-        print("OK: no inline JavaScript blocks found")
-        return
-
-    with tempfile.TemporaryDirectory() as directory:
-        for index, script in enumerate(inline_scripts, start=1):
-            script_path = Path(directory) / f"inline-{index}.js"
-            script_path.write_text(script, encoding="utf-8")
-            result = subprocess.run(
-                ["node", "--check", str(script_path)],
-                capture_output=True,
-                text=True,
-            )
-            if result.returncode != 0:
-                print(result.stderr, file=sys.stderr)
-                fail(f"JavaScript syntax check failed for inline block {index}")
-
-    print(f"OK: {len(inline_scripts)} inline JavaScript block(s) passed syntax checks")
-
-
+    app_path = ROOT / "assets/js/app.js"
+    if '<script src="assets/js/app.js" defer></script>' not in html:
+        fail("index.html does not load the split application JavaScript")
+    result = subprocess.run(["node", "--check", str(app_path)], capture_output=True, text=True)
+    if result.returncode != 0:
+        print(result.stderr, file=sys.stderr)
+        fail("JavaScript syntax check failed for assets/js/app.js")
+    print("OK: split JavaScript passed syntax checks")
+def check_external_css() -> None:
+    html = (ROOT / "index.html").read_text(encoding="utf-8")
+    css_path = ROOT / "assets/css/styles.css"
+    if '<link rel="stylesheet" href="assets/css/styles.css">' not in html:
+        fail("index.html does not load the split stylesheet")
+    if css_path.stat().st_size == 0:
+        fail("split stylesheet is empty")
+    print("OK: split stylesheet is present")
 def check_sensitive_files() -> None:
     forbidden_suffixes = {".env", ".pem", ".key", ".p12", ".pfx", ".xlsx", ".xls"}
     forbidden_names = {"id_rsa", "credentials.json", "service-account.json"}
@@ -180,7 +177,8 @@ def main() -> None:
     check_html()
     check_seo_metadata()
     check_i18n()
-    check_inline_javascript()
+    check_external_javascript()
+    check_external_css()
     check_sensitive_files()
     check_readme_links()
     print("All BOM repository checks passed.")
