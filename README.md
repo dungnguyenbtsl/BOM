@@ -484,6 +484,17 @@ Bộ test chạy `app.js` trong browser sandbox giả lập và kiểm tra các 
 
 GitHub Actions tự động chạy `npm test` trên mọi push vào `main` và Pull Request.
 
+## Tối ưu CI/CD
+
+Workflow được cấu hình để giảm các lần chạy không cần thiết:
+
+- CI chỉ chạy khi `index.html`, `assets/`, `tests/`, `package.json`, checker hoặc chính workflow CI thay đổi.
+- GitHub Pages chỉ chạy khi nội dung website (`index.html`, `assets/`, `robots.txt`, `sitemap.xml`) hoặc workflow deploy thay đổi.
+- Artifact Pages được tạo trong thư mục `_site/` và chỉ chứa các file cần public, không đóng gói test, tài liệu repository hay cấu hình GitHub.
+- Concurrency CI hủy run cũ khi có commit mới; deployment Pages vẫn giữ run đang triển khai để tránh cắt ngang publish.
+
+Do ứng dụng hiện không có dependency npm runtime, CI không thêm bước `npm install` hoặc cache dependency không cần thiết.
+
 ## Đa ngôn ngữ
 
 Ứng dụng hỗ trợ chuyển đổi giao diện giữa ba ngôn ngữ:
