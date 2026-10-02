@@ -27,6 +27,9 @@ REQUIRED_FILES = [
     "assets/logo.jpeg",
     "assets/css/styles.css",
     "assets/js/app.js",
+    "assets/vendor/xlsx.full.min.js",
+    "assets/vendor/html-docx.js",
+    "THIRD-PARTY-NOTICES.md",
 ]
 
 
@@ -131,6 +134,36 @@ def check_external_css() -> None:
     if css_path.stat().st_size == 0:
         fail("split stylesheet is empty")
     print("OK: split stylesheet is present")
+
+
+def check_vendor_assets() -> None:
+    html = (ROOT / "index.html").read_text(encoding="utf-8")
+    required_scripts = [
+        '<script src="assets/vendor/xlsx.full.min.js" defer></script>',
+        '<script src="assets/vendor/html-docx.js" defer></script>',
+    ]
+    missing = [snippet for snippet in required_scripts if snippet not in html]
+    if missing:
+        fail("local vendor scripts are not loaded: " + ", ".join(missing))
+    if "cdnjs.cloudflare.com" in html or "cdn.jsdelivr.net" in html:
+        fail("index.html still contains a CDN dependency")
+    for relative in ("assets/vendor/xlsx.full.min.js", "assets/vendor/html-docx.js"):
+        result = subprocess.run(
+            [
+                "node",
+                "-e",
+                "const fs=require('fs'); new Function(fs.readFileSync(process.argv[1], 'utf8'));",
+                str(ROOT / relative),
+            ],
+            capture_output=True,
+            text=True,
+        )
+        if result.returncode != 0:
+            print(result.stderr, file=sys.stderr)
+            fail(f"browser-script syntax check failed for {relative}")
+    print("OK: vendor JavaScript assets are self-hosted")
+
+
 def check_sensitive_files() -> None:
     forbidden_suffixes = {".env", ".pem", ".key", ".p12", ".pfx", ".xlsx", ".xls"}
     forbidden_names = {"id_rsa", "credentials.json", "service-account.json"}
@@ -179,6 +212,7 @@ def main() -> None:
     check_i18n()
     check_external_javascript()
     check_external_css()
+    check_vendor_assets()
     check_sensitive_files()
     check_readme_links()
     print("All BOM repository checks passed.")

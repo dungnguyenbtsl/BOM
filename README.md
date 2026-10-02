@@ -399,8 +399,8 @@ Khi in, nên kiểm tra trước:
 | Model không có định mức | Mã model giữa hai file không khớp | Kiểm tra khoảng trắng, chữ hoa/chữ thường và mã sản phẩm |
 | Nhu cầu vật liệu bằng 0 | Định mức ở cột N không phải số | Chuyển định mức sang dạng số trong Excel |
 | Không đọc được Excel | File lỗi hoặc định dạng không được hỗ trợ | Mở lại file bằng Excel rồi lưu thành `.xlsx` |
-| Không xuất được Word | CDN của `html-docx-js` không truy cập được | Kiểm tra kết nối mạng và tải lại trang |
-| Không thấy logo | Link logo ngoài không truy cập được | Kiểm tra kết nối hoặc chuyển logo vào repo hiện tại |
+| Không xuất được Word | File vendor `html-docx-js` bị thiếu hoặc hỏng | Chạy lại CI và kiểm tra `assets/vendor/html-docx.js` |
+| Không thấy logo | File logo local bị thiếu hoặc hỏng | Kiểm tra `assets/logo.jpeg` trong repository |
 | Bảng in bị tràn | Dữ liệu quá dài hoặc trình duyệt scale không phù hợp | Chọn A4 ngang và điều chỉnh tỷ lệ in |
 | Ký tự tiếng Trung bị lỗi | Font không có sẵn trên máy | Cài font phù hợp hoặc bổ sung font dự phòng |
 
@@ -434,7 +434,7 @@ fix: handle missing BOM model
 refactor: separate material grouping logic
 style: improve A4 print layout
 docs: update Excel input format
-chore: update CDN dependency
+chore: update vendored dependency
 ```
 
 ### Quy trình pull request
@@ -463,7 +463,9 @@ assets/js/app.js        # i18n, xử lý BOM, xuất file và lịch sử xuất
 assets/logo.jpeg        # Logo giao diện
 ```
 
-Các thư viện bên thứ ba vẫn được tải từ CDN trong `index.html`; logic ứng dụng không còn nằm trong JavaScript inline.
+Các thư viện bên thứ ba được tự host trong `assets/vendor/`; ứng dụng không còn phụ thuộc CDN khi chạy production. Logic ứng dụng cũng không nằm trong JavaScript inline.
+
+Danh sách nguồn và license được ghi tại [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
 
 ## Kiểm thử tự động
 
@@ -517,7 +519,8 @@ Workflow [CI](.github/workflows/ci.yml) tự động chạy khi có push lên `m
 
 - Các file tài liệu và cấu hình bắt buộc có tồn tại và không rỗng.
 - Cấu trúc HTML cơ bản của `index.html`.
-- Cú pháp JavaScript inline bằng Node.js.
+- Cú pháp JavaScript trong `assets/js/app.js` bằng Node.js.
+- Vendor assets được tải local và không có URL CDN trong `index.html`.
 - Không có file credential hoặc file Excel dữ liệu sản xuất trong repository.
 - Các liên kết nội bộ trong README trỏ đến file tồn tại.
 
@@ -540,21 +543,9 @@ https://dungnguyenbtsl.github.io/BOM/
 
 Khi cập nhật `index.html` trên branch `main`, GitHub Actions sẽ triển khai lại phiên bản mới theo cấu hình workflow hiện tại.
 
-## Cấu hình CDN
+## Vendor dependencies
 
-Ứng dụng hiện sử dụng các thư viện bên ngoài:
-
-- SheetJS từ cdnjs.
-- html-docx-js từ jsDelivr.
-- Logo từ GitHub Pages của repo FULIAO-LABEL.
-
-Đối với môi trường doanh nghiệp hoặc mạng nội bộ, nên cân nhắc:
-
-- Pin phiên bản thư viện rõ ràng.
-- Lưu bản thư viện vào thư mục `vendor/`.
-- Dùng Subresource Integrity nếu CDN hỗ trợ.
-- Đưa logo vào cùng repository.
-- Có phương án hoạt động khi không có Internet.
+SheetJS `0.18.5` và `html-docx-js` `0.3.1` được pin phiên bản và lưu nội bộ trong `assets/vendor/`. Cách này giúp BOM hoạt động ổn định trong mạng nội bộ hoặc khi CDN bên ngoài không truy cập được. Khi cập nhật thư viện, cần tải lại file, kiểm tra SHA-256, cập nhật [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) và chạy `npm test`.
 
 ## Roadmap
 
@@ -563,10 +554,10 @@ Khi cập nhật `index.html` trên branch `main`, GitHub Actions sẽ triển k
 - [ ] Bổ sung bản README tiếng Anh nếu cần chia sẻ rộng rãi.
 - [ ] Thêm file Excel mẫu đã ẩn dữ liệu nhạy cảm.
 - [ ] Thêm ảnh chụp màn hình vào thư mục `docs/images/`.
-- [ ] Tách CSS và JavaScript khỏi `index.html`.
+- [x] Tách CSS và JavaScript khỏi `index.html`.
 - [ ] Hiển thị danh sách model không tìm thấy trong BOM.
 - [ ] Thêm kiểm tra rõ ràng cho định mức và số lượng âm.
-- [ ] Đưa logo vào repository hiện tại.
+- [x] Đưa logo vào repository hiện tại.
 
 ### Trung hạn
 
