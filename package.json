@@ -1,0 +1,13 @@
+{
+  "name": "bom-production-material-calculator",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "BOM production material requirement calculator",
+  "scripts": {
+    "test": "node --test tests/unit/**/*.test.js"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

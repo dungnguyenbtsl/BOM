@@ -196,19 +196,24 @@ Mở trực tiếp file `index.html` cũng có thể hoạt động trong nhiề
 
 ```text
 BOM/
-├── index.html              # Giao diện, CSS và logic xử lý chính
-├── assets/logo.jpeg       # Logo local dùng cho giao diện và social preview
-├── robots.txt              # Quy tắc crawler và liên kết sitemap
-├── sitemap.xml             # Sitemap cho trang public
-├── README.md               # Tài liệu dự án
-├── LICENSE                # MIT License
-├── CONTRIBUTING.md        # Hướng dẫn đóng góp
-├── CODE_OF_CONDUCT.md     # Quy tắc ứng xử
-├── SECURITY.md            # Chính sách bảo mật
+├── index.html                 # Markup giao diện và SEO metadata
+├── assets/
+│   ├── css/styles.css         # CSS giao diện và bản in
+│   ├── js/app.js              # Logic ứng dụng
+│   └── logo.jpeg              # Logo local
+├── tests/unit/app.test.js     # Unit Tests cho logic JavaScript
+├── package.json               # Lệnh npm test và cấu hình Node.js
+├── robots.txt                 # Quy tắc crawler và liên kết sitemap
+├── sitemap.xml                # Sitemap cho trang public
+├── README.md                  # Tài liệu dự án
+├── LICENSE                    # MIT License
+├── CONTRIBUTING.md            # Hướng dẫn đóng góp
+├── CODE_OF_CONDUCT.md         # Quy tắc ứng xử
+├── SECURITY.md                # Chính sách bảo mật
 └── .github/
-    ├── ISSUE_TEMPLATE/    # Mẫu issue báo lỗi và đề xuất
-    ├── scripts/           # Script kiểm tra CI
-    └── workflows/         # CI và triển khai GitHub Pages
+    ├── ISSUE_TEMPLATE/       # Mẫu issue báo lỗi và đề xuất
+    ├── scripts/               # Script kiểm tra CI
+    └── workflows/             # CI và triển khai GitHub Pages
 ```
 
 ## Đóng góp
@@ -459,6 +464,25 @@ assets/logo.jpeg        # Logo giao diện
 ```
 
 Các thư viện bên thứ ba vẫn được tải từ CDN trong `index.html`; logic ứng dụng không còn nằm trong JavaScript inline.
+
+## Kiểm thử tự động
+
+Unit Tests sử dụng **Node.js native test runner**, không cần framework hoặc dependency bên ngoài:
+
+```bash
+npm test
+```
+
+Bộ test chạy `app.js` trong browser sandbox giả lập và kiểm tra các logic chính:
+
+- Phát hiện ngôn ngữ trình duyệt và ưu tiên ngôn ngữ đã lưu.
+- Dịch chuỗi và thay thế biến trong thông báo.
+- Đọc lịch sử xuất hợp lệ hoặc xử lý dữ liệu `localStorage` bị hỏng.
+- Lưu nội dung file, loại bản ghi trùng và giới hạn 10 bản ghi gần nhất.
+- Xử lý lỗi vượt quota `localStorage` mà không làm gián đoạn xuất file.
+- Xóa lịch sử xuất.
+
+GitHub Actions tự động chạy `npm test` trên mọi push vào `main` và Pull Request.
 
 ## Đa ngôn ngữ
 
